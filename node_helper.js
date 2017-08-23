@@ -2,7 +2,7 @@
 
 const moment = require('moment')
 const TelegramBot = require('node-telegram-bot-api');
-
+var fs = require('fs');
 
 const startTime = moment()
 
@@ -42,9 +42,12 @@ module.exports = NodeHelper.create({
 
       this.TB.on('message', (msg) =>{
         var time = moment.unix(msg.date)
-        console.log (this.allowed)
         if (startTime.isBefore(time)) {
-          console.log("[TLGBOT][" + time.format('YYYY-MM-DD HH:mm:ss') + "] Message is coming.")
+          console.log(
+            "[TELBOT][" + time.format('YYYY-MM-DD HH:mm:ss')
+            + "]" + this.config.text["TELBOT_HELPER_MSG_COMING"]
+            + ":" + msg.chat.id
+          )
           if (!this.allowed.has(msg.from.username)) {
             this.say(this.notAllowedMsg(msg.message_id, msg.chat.id))
           }
@@ -78,9 +81,8 @@ module.exports = NodeHelper.create({
 
   tooOldMsg: function(origMsg) {
     var text = origMsg.text
-      + "\nYour message on `"
+      + this.config.text["TELBOT_HELPER_TOOOLDMSG"]
       + moment.unix(origMsg.date).format('YYYY-MM-DD HH:mm:ss')
-      + "` is too old so I'll ignore."
     var msg = {
       type: 'TEXT',
       chat_id: origMsg.chat.id,
@@ -94,8 +96,9 @@ module.exports = NodeHelper.create({
   },
 
   welcomeMsg: function() {
-    var text = "*I've just woken from a deep sleep!*\n"
-      + "`MagicMirror` is restarted on `" + startTime.format("YYYY-MM-DD HH:mm:ss") + "`.\n"
+    var text = "*" + this.config.text["TELBOT_HELPER_WAKEUP"] + "*\n"
+      + this.config.text["TELBOT_HELPER_RESTART"]
+      + "\n`" + startTime.format("YYYY-MM-DD HH:mm:ss") + "`\n"
     var msg = {
       type: 'TEXT',
       chat_id: this.adminChatId,
@@ -109,7 +112,7 @@ module.exports = NodeHelper.create({
   },
 
   notAllowedMsg: function(messageid, chatid) {
-    var text = "You are not allowed to command me. Ask to my admin."
+    var text = this.config.text["TELBOT_HELPER_NOT_ALLOWED"]
     var msg = {
       type: 'TEXT',
       chat_id: chatid,
@@ -126,18 +129,48 @@ module.exports = NodeHelper.create({
   say: function(r, adminMode=false) {
     var chatId = (adminMode) ? this.adminChatId : r.chat_id
     var self = this
+    console.log("SAY_RESPONSE", r)
     switch(r.type) {
-      case 'PHOTO':
-        this.TB.sendPhoto(chatId, r.url, r.option).catch((e) => {self.onError(e, r)})
+      case 'VOICE_PATH':
+        var data = fs.readFileSync(r.path);
+        this.TB.sendVoice(chatId, data, r.option).catch((e) => {self.onError(e, r)})
         break;
-      case 'AUDIO':
-        this.TB.sendAudio(chatId, r.url, r.option).catch((e) => {self.onError(e, r)})
+      case 'VOICE_URL':
+        this.TB.sendVoice(chatId, r.path, r.option).catch((e) => {self.onError(e, r)})
+        break;
+      case 'VIDEO_PATH':
+        var data = fs.readFileSync(r.path);
+        this.TB.sendVideo(chatId, data, r.option).catch((e) => {self.onError(e, r)})
+        break;
+      case 'VIDEO_URL':
+        this.TB.sendVideo(chatId, r.path, r.option).catch((e) => {self.onError(e, r)})
+        break;
+      case 'DOCUMENT_PATH':
+        var data = fs.readFileSync(r.path);
+        this.TB.sendDocument(chatId, data, r.option).catch((e) => {self.onError(e, r)})
+        break;
+      case 'DOCUMENT_URL':
+        this.TB.sendDocument(chatId, r.path, r.option).catch((e) => {self.onError(e, r)})
+        break;
+      case 'PHOTO_PATH':
+        var data = fs.readFileSync(r.path);
+        this.TB.sendPhoto(chatId, data, r.option).catch((e) => {self.onError(e, r)})
+        break;
+      case 'PHOTO_URL':
+        this.TB.sendPhoto(chatId, r.path, r.option).catch((e) => {self.onError(e, r)})
+        break;
+      case 'AUDIO_PATH':
+        var data = fs.readFileSync(r.path);
+        this.TB.sendAudio(chatId, data, r.option).catch((e) => {self.onError(e, r)})
+        break;
+      case 'AUDIO_URL':
+        this.TB.sendAudio(chatId, r.path, r.option).catch((e) => {self.onError(e, r)})
         break;
       case 'LOCATION':
         this.TB.sendLocation(chatId, r.latitude, r.longitude, r.option).catch((e) => {self.onError(e, r)})
         break;
       case 'VENUE':
-        this.TB.sendLocation(chatId, r.latitude, r.longitude, r.title, r.address, r.option).catch((e) => {self.onError(e, r)})
+        this.TB.sendVenue(chatId, r.latitude, r.longitude, r.title, r.address, r.option).catch((e) => {self.onError(e, r)})
         break;
       case 'CONTACT':
         this.TB.sendContact(chatId, r.phoneNumber, r.firstName, r.option).catch((e) => {self.onError(e, r)})
@@ -150,7 +183,6 @@ module.exports = NodeHelper.create({
   },
 
   ask: function(r, adminMode=false) {
-    console.log("ask!", r)
     var chatId = (adminMode) ? this.adminChatId : r.chat_id
     var sessionId = r.askSession.session_id
 
@@ -185,20 +217,19 @@ module.exports = NodeHelper.create({
         this.ask(payload)
         break;
       case 'ALLOWEDUSER':
-        console.log('payload', payload)
         this.allowed = new Set(payload)
-        console.log(">", this.allowed)
         break;
     }
   },
 
   onError: function(err, response) {
-    console.log("[TLGBOT] Error: " + err.code)
+    console.log("[TELBOT] Error: " + err.code)
     if (typeof err.response !== 'undefined') {
       console.log(err.response.body)
     } else {
       console.log(err)
     }
+    console.log("ERR_RESPONSE", response)
     if (err.code !== 'EFATAL') {
       var text = '`ERROR`\n'
         + "```\n"
@@ -217,6 +248,13 @@ module.exports = NodeHelper.create({
         }
       }
       this.say(msg, true)
+      msg = {
+        type: 'TEXT',
+        chat_id: response.chat_id,
+        text: this.config.text["TELBOT_HELPER_ERROR"]
+      }
+      this.say(msg)
+      //console.log(msg)
     }
   }
 })

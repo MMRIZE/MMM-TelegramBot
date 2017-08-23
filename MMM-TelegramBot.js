@@ -4,50 +4,21 @@
  *
  * By eouia
  */
+ String.prototype.toRegExp = function() {
+   var lastSlash = this.lastIndexOf("/")
+   if(lastSlash > 1) {
+     var restoredRegex = new RegExp(
+       this.slice(1, lastSlash),
+       this.slice(lastSlash + 1)
+     )
+     return (restoredRegex) ? restoredRegex : new RegExp(this.valueOf())
+   } else {
+     return new RegExp(this.valueOf())
+   }
+ }
 
 
 
-var defaultCommands = [
-  {
-    command: 'help',
-    description: 'Show description of commands.',
-    TLGBOT_callee : 'TLGBOT_help',
-    TLGBOT_callee_cammand : 'HELP',
-    TLGBOT_description : "Show description of commands.\ne.g)`/help commands`.",
-    TLGBOT_args_pattern : /([^\s]+)/,
-  },
-  {
-    command: 'commands',
-    description: 'List of available commands.',
-    TLGBOT_callee : 'TLGBOT_list_commands'
-  },
-  {
-    command: 'modules',
-    description: 'List of current installed modules.',
-    TLGBOT_callee : 'TLGBOT_list_modules'
-  },
-  {
-    command : 'mychatid',
-    description: 'Show chatId of this chat room.',
-    TLGBOT_callee : 'TLGBOT_mychatid'
-  },
-  {
-    command : 'allowed',
-    description: 'List of allowed users',
-    TLGBOT_callee : 'TLGBOT_allowed'
-  },
-  {
-    command : 'allowuser',
-    description : 'Allow user for using this bot.',
-    TLGBOT_description: 'Allow user temporally. This user will lost permission after restart. You can put this user into `allowedUser` in `config.js` for permanent permission.',
-    TLGBOT_callee : 'TLGBOT_allowuser',
-    TLGBOT_args_pattern : /([^\s]+)/,
-  },
-]
-
-
-var tempSpace = {}
-tempSpace.session = []
 
 Module.register("MMM-TelegramBot", {
   defaults: {
@@ -56,61 +27,159 @@ Module.register("MMM-TelegramBot", {
   requiresVersion: "2.1.2", // Required version of MagicMirror
 
   start: function() {
+    this.isAlreadyInitialized = 0
     this.commands = []
     this.askSession = new Set()
+    this.config.text = {
+      "TELBOT_HELPER_ERROR" : this.translate("TELBOT_HELPER_ERROR"),
+      "TELBOT_HELPER_NOT_ALLOWED" : this.translate("TELBOT_HELPER_NOT_ALLOWED"),
+      "TELBOT_HELPER_RESTART" : this.translate("TELBOT_HELPER_RESTART"),
+      "TELBOT_HELPER_WAKEUP" : this.translate("TELBOT_HELPER_WAKEUP"),
+      "TELBOT_HELPER_MSG_COMING" : this.translate("TELBOT_HELPER_MSG_COMING"),
+      "TELBOT_HELPER_TOOOLDMSG" : this.translate("TELBOT_HELPER_TOOOLDMSG")
+    }
     this.sendSocketNotification('INIT', this.config)
-    this.registerCommands(this, defaultCommands)
+    this.getCommands(
+      new TelegramBotCommandRegister(this, this.registerCommand.bind(this))
+    )
     this.allowed = new Set(this.config.allowedUser)
-    console.log(this.allowed)
   },
 
-  registerCommands: function(module, commandsArray) {
-    if (!Array.isArray(commandsArray)) return
-
-    for(var i in commandsArray) {
-      var c = commandsArray[i]
-      var command = c.command
-      var moduleName = module.name
-
-      if (typeof module[c.TLGBOT_callee] !== 'function') continue
-
-      var isNameUsed = 1
-      var idx = 0
-      for (var j in this.commands) {
-        var sameCommand = this.commands.filter(function(com) {
-          if (com.command == command) return com
-        })
-        if (sameCommand.length > 0) {
-          isNameUsed = 1
-          command = c.command + idx
-          idx++
-        } else {
-          isNameUsed = 0
-        }
-      }
-
-      var callee = ((c.TLGBOT_callee) ? (c.TLGBOT_callee) : 'notificationReceived')
-
-      var cObj = {
-        command : command,
-        execute : (c.TLGBOT_callee_command) ? c.TLGBOT_callee_command : c.command,
-        moduleName : module.name,
-        module : module,
-        description: (c.TLGBOT_description)
-          ? (c.TLGBOT_description) : ((c.description) ? c.description : ""),
-        callee : callee,
-        argsPattern : c.TLGBOT_args_pattern
-      }
-      this.commands.push(cObj)
+  getTranslations: function() {
+    return {
+  		en: "translations/en.json",
     }
   },
 
-  getCommands: function(requester=null) {
+  getScripts: function() {
+    return ["TELBOT_lib.js"]
   },
 
+  registerCommand: function(module, commandObj) {
+    var c = commandObj
+    var command = c.command
+    var moduleName = module.name
 
+    var callback = ((c.callback) ? (c.callback) : 'notificationReceived')
+    if (typeof module[callback] !== 'function') return false
 
-  TLGBOT_allowed: function(command, handler) {
+    var isNameUsed = 1
+    var idx = 0
+    for (var j in this.commands) {
+      var sameCommand = this.commands.filter(function(com) {
+        if (com.command == command) return com
+      })
+      if (sameCommand.length > 0) {
+        isNameUsed = 1
+        command = c.command + idx
+        idx++
+      } else {
+        isNameUsed = 0
+      }
+    }
+
+    var cObj = {
+      command : command,
+      execute : c.command,
+      moduleName : module.name,
+      module : module,
+      description: c.description,
+      callback : callback,
+      argsPattern : c.args_pattern,
+      argsMapping : c.args_mapping,
+    }
+    this.commands.push(cObj)
+  },
+
+  getCommands: function(Register) {
+    var defaultCommands = [
+      {
+        command: 'help',
+        callback : 'TELBOT_help',
+        description : this.translate("TELBOT_HELP"),
+        args_pattern : [/^[^\s]+/],
+        args_mapping : ['command']
+      },
+      {
+        command: 'commands',
+        description: this.translate("TELBOT_COMMANDS"),
+        callback : 'TELBOT_list_commands'
+      },
+      {
+        command: 'modules',
+        description: this.translate("TELBOT_MODULES"),
+        callback : 'TELBOT_list_modules'
+      },
+      {
+        command : 'mychatid',
+        description: this.translate("TELBOT_MYCHATID"),
+        callback : 'TELBOT_mychatid'
+      },
+      {
+        command : 'allowed',
+        description: this.translate("TELBOT_ALLOWED"),
+        callback : 'TELBOT_allowed'
+      },
+      {
+        command : 'allowuser',
+        description: this.translate("TELBOT_ALLOWUSER"),
+        callback : 'TELBOT_allowuser',
+        args_pattern : [/^[^\s]+/],
+        args_mapping : ['username']
+      },
+      {
+        command: 'hideall',
+        description : this.translate("TELBOT_HIDEALL"),
+        callback : 'TELBOT_hideall',
+      },
+      {
+        command: 'showall',
+        description : this.translate("TELBOT_SHOWALL"),
+        callback : 'TELBOT_showall',
+      },
+      {
+        command: 'alert',
+        description : this.translate("TELBOT_ALERT"),
+        callback : 'TELBOT_alert',
+      },
+    ]
+
+    defaultCommands.forEach((c) => {
+      Register.add(c)
+    })
+  },
+
+  TELBOT_alert: function (command, handler) {
+    var title = handler.message.from.username
+    var message = handler.args
+    var text = this.translate("TELBOT_ALERT_RESULT")
+    this.sendNotification('SHOW_ALERT', {
+      timer:30000,
+      title:title,
+      message:message
+    })
+    handler.reply("TEXT", text, {parse_mode:'Markdown'})
+  },
+
+  TELBOT_hideall: function(command, handler) {
+    var text = this.translate("TELBOT_HIDEALL_RESULT")
+    var lockString = this.name
+    MM.getModules().enumerate((m)=> {
+      m.hide(0, {lockString:lockString})
+    })
+    handler.reply("TEXT", text, {parse_mode:'Markdown'})
+  },
+  
+  TELBOT_showall: function(command, handler) {
+    var text = this.translate("TELBOT_SHOWALL_RESULT")
+    var lockString = this.name
+    MM.getModules().enumerate((m)=> {
+      m.show(0, {lockString:lockString})
+    })
+    handler.reply("TEXT", text, {parse_mode:'Markdown'})
+  },
+
+  TELBOT_allowed: function(command, handler) {
     var text = ""
     for (var username of this.allowed) {
       if (text == "") {
@@ -122,49 +191,46 @@ Module.register("MMM-TelegramBot", {
     handler.reply("TEXT", text, {parse_mode:'Markdown'})
   },
 
-  TLGBOT_allowuser: function(command, handler) {
+  TELBOT_allowuser: function(command, handler) {
     var text = ""
-    if (handler.message.chat.id !== this.config.adminChatId) {
-      text = "Only Admin in his private chat with me can command this."
+    if (handler.message.admin !== 'admin') {
+      text = this.translate("TELBOT_ALLOWUSER_ONLY_ADMIN")
     } else if (handler.args !== null) {
-      var user = handler.args[1]
+      var user = handler.args['username']
       this.allowed.add(user)
       this.sendSocketNotification('ALLOWEDUSER', [...this.allowed])
-      text = "User is registered. \n Try `/allowed` for check. \nThis user will lost permission after restart. You can put this user into `allowedUser` in `config.js` for permanent permission."
+      text = this.translate("TELBOT_ALLOWUSER_REGISTERED")
     } else {
-      text = "I cannot register this user. check the spell or username missing."
+      text = this.translate("TELBOT_ALLOWUSER_ERROR")
     }
 
     handler.reply("TEXT", text, {parse_mode:'Markdown'})
   },
 
-  TLGBOT_mychatid: function(command, handler) {
+  TELBOT_mychatid: function(command, handler) {
     //handler.tell, handler.reply, handler.ask
-    var text = "Your `chatId` is `" + handler.message.chat.id + "`."
+    var text = this.translate(
+      "TELBOT_MYCHATID_RESULT",
+      {"chatid":handler.message.chat.id}
+    )
     handler.reply("TEXT", text, {parse_mode:'Markdown'})
   },
 
-
-
-  TLGBOT_list_modules: function(command, handler) {
+  TELBOT_list_modules: function(command, handler) {
     var text = ""
-
     MM.getModules().enumerate((m) => {
       text += "`" + m.name + "`"
       text += ((m.hidden) ? " _hidden_" : " _showing_")
       text += "\n"
     })
-
     if (!text) {
-      text = "I cannot find any module. hmmm... weird."
+      text = this.translate("TELBOT_MODULES_ERROR")
     }
-
     handler.reply('TEXT', text, {parse_mode:'Markdown'})
   },
 
-  TLGBOT_list_commands: function(command, handler) {
+  TELBOT_list_commands: function(command, handler) {
     var text = ""
-
     this.commands.forEach((c) => {
       text += "`/" + c.command + "`"
       text += ((c.moduleName) ? (" - _" + c.moduleName + "_"): "")
@@ -172,73 +238,123 @@ Module.register("MMM-TelegramBot", {
     })
 
     if (!text) {
-      text = "I cannot find any command. hmmm... weird."
+      text = this.translate("TELBOT_COMMANDS_ERROR")
     }
 
     handler.reply("TEXT", text, {parse_mode:'Markdown'})
   },
 
-  TLGBOT_help: function(command, handler) {
+  TELBOT_help: function(command, handler) {
     var target
     var text = ""
-    console.log("help??", handler.args)
     if (handler.args !== null) {
-      target = handler.args[1]
-      this.commands.forEach(function(c){
+      target = handler.args['command']
+      this.commands.forEach((c)=>{
         if (c.command == target) {
           text += "`/" + c.command + "`\n"
-          text += (c.description) ? c.description : "-"
+          text += (c.description) ? c.description : ""
           text += "\n"
-          text += ((c.moduleName) ? ("_Served by " + c.moduleName + "_"): "")
+          text += (
+            (c.moduleName)
+              ? (this.translate('TELBOT_HELP_SERVED', {"module":c.moduleName}))
+              : ""
+          )
           text += "\n"
         }
       })
     }
 
     if (!text) {
-      text = "What can I do for you? try `/help help`"
+      text = this.translate("TELBOT_HELP_HELP")
     }
 
     var result = handler.reply("TEXT", text, {parse_mode:'Markdown'})
-    console.log('help_result', result)
   },
 
   parseCommand: function(msg) {
+    var args = null
     var response = null
     var chatId = msg.chat.id
     if (typeof msg.text == 'undefined') return
     var msgText = msg.text
 
-    var matched = msgText.match(new RegExp("^\/([0-9a-zA-Z-_]+)(.*)$"))
 
+    var matched = msgText.match(new RegExp("^\/([0-9a-zA-Z-_]+)\s?(.*)$"))
     if (matched) { // This is something like command
+      var commandFound = 0
       for (var i in this.commands) {
         var c = this.commands[i]
         if (c.command == matched[1]) { // Proper command found!
-          var ap = (c.argsPattern) ? c.argsPattern : null
-          ap = (ap instanceof RegExp) ? ap : ((typeof ap == 'string') ? ap.toRegexp() : /.*/)
-          var args = ap.exec(matched[2].trim())
+          commandFound = 1
+          var restText = matched[2]
+          if (restText.trim() == '') {
+            args = null
+          } else {
+            if (c.argsPattern && Array.isArray(c.argsPattern)) {
+              args = []
+              for(var j = 0; j < c.argsPattern.length; j++) {
+                var p = c.argsPattern[j]
+                if (p instanceof RegExp) {
+                  //do nothing.
+                } else {
+                  if (typeof p == 'string') {
+                    p = p.toRegExp()
+                  } else {
+                    p = /.*/
+                  }
+                }
+                var result = p.exec(restText.trim())
+                if (c.argsMapping && Array.isArray(c.argsMapping)) {
+                  if (typeof c.argsMapping[j] !== 'undefined') {
+                    if (result && result.length == 1) {
+                      args[c.argsMapping[j]] = result[0]
+                    } else {
+                      args[c.argsMapping[j]] = result
+                    }
+                  } else {
+                    args.push(result)
+                  }
+                } else {
+                  args.push(result)
+                }
+              }
+            } else {
+              args = restText
+            }
+          }
+
+          if (msg.chat.id == this.config.adminChatId) {
+            msg.admin = 'admin'
+          }
 
           var callbacks = {
             reply: this.reply.bind(this),
             ask: this.ask.bind(this),
             say: this.say.bind(this)
           }
-          var handler = new TLGBotMessageHandler(msg, args, callbacks)
-          c.module[c.callee].bind(c.module)
-          c.module[c.callee](c.execute, handler)
+          var handler = new TelegramBotMessageHandler(msg, args, callbacks)
+          c.module[c.callback].bind(c.module)
+          c.module[c.callback](c.execute, handler)
 
         } else {
-          continue;
+          continue
         }
       }
+      if (commandFound == 0) {
+        var callbacks = {
+          reply: this.reply.bind(this),
+          ask: this.ask.bind(this),
+          say: this.say.bind(this)
+        }
+        var handler = new TelegramBotMessageHandler(msg, null, callbacks)
+        handler.reply("TEXT", this.translate("TELBOT_NOT_REGISTERED_COMMAND"))
+      }
     } else {
-
+      // do nothing. This is not command
     }
   },
 
   reply: function(response) {
-    console.log("SN_REPLY:", response)
     this.sendSocketNotification('REPLY', response)
   },
 
@@ -261,38 +377,8 @@ Module.register("MMM-TelegramBot", {
       this.sendSocketNotification('SAY', response)
     }
   },
-/*
-  replyFunc: function(response, adminMode=false) {
-    MM.getModules().enumerate(function(m) {
-      if (m.name == 'MMM-TelegramBot') {
-        m.sayTelegram(response, adminMode)
-      }
-    })
-  },
-  tellFunc: function(response, adminMode=false) {
-    this.sayTelegram(response, adminMode)
-  },
-  askFunc: function(response, adminMode=false) {
-    this.askTelegram(response, adminMode)
-  },
 
-  sayTelegram: function(response, adminMode=false) {
-    if (adminMode) {
-      this.sendSocketNotification('SAY_ADMIN', response)
-    } else {
-      this.sendSocketNotification('SAY', response)
-    }
-  },
-  askTelegram: function(response, adminMode=false) {
-    if (adminMode) {
-      this.sendSocketNotification('ASK_ADMIN', response)
-    } else {
-      this.sendSocketNotification('ASK', response)
-    }
-  },
-*/
   socketNotificationReceived: function (notification, payload) {
-    console.log('NOTI', notification, payload)
     switch (notification) {
       case 'MESSAGE':
         this.parseCommand(payload)
@@ -306,7 +392,11 @@ Module.register("MMM-TelegramBot", {
               ask: this.ask.bind(this),
               say: this.say.bind(this)
             }
-            var handler = new TLGBotMessageHandler(payload, payload.text, callbacks)
+            var handler = new TelegramBotMessageHandler(
+              payload,
+              payload.text,
+              callbacks
+            )
             s.callback("ANSWER_FOR_ASK", handler)
             this.askSession.delete(s)
             return
@@ -316,209 +406,37 @@ Module.register("MMM-TelegramBot", {
             this.askSession.delete(s)
           }
         })
-
-        break;
+      break;
     }
   },
 
   notificationReceived: function (notification, payload) {
     switch(notification) {
       case 'ALL_MODULES_STARTED':
-        console.log("???", this.allowed)
+        if (this.isAlreadyInitialized) {
+          return
+        }
+        this.isAlreadyInitialized = 1
         this.sendSocketNotification('ALLOWEDUSER', [...this.allowed])
         var commands = []
         var self = this
         MM.getModules().enumerate((m) => {
-          if (typeof m.getCommands == 'function') {
-            this.registerCommands(m, m.getCommands(this))
+          if (m.name !== 'MMM-TelegramBot') {
+            if (typeof m.getCommands == 'function') {
+              m.getCommands(new TelegramBotCommandRegister(
+                m,
+                this.registerCommand.bind(this)
+              ))
+            }
           }
         })
         break;
-      case 'TLGBOT_TELL':
-        this.sayTelegram(payload, false)
+      case 'TELBOT_TELL':
+        this.say(payload, false)
         break;
-      case 'TLGBOT_TELL_ADMIN':
-        this.sayTelegram(payload, true)
+      case 'TELBOT_TELL_ADMIN':
+        this.say(payload, true)
         break;
     }
   },
 })
-
-String.prototype.toRegexp = function() {
-  var lastSlash = this.lastIndexOf("/")
-  if(lastSlash > 1) {
-    var restoredRegex = new RegExp(
-      this.slice(1, lastSlash),
-      this.slice(lastSlash + 1)
-    )
-    return (restoredRegex) ? restoredRegex : this
-  } else {
-    return this
-  }
-}
-
-function TLGBotMessageHandler (message, args, callbacks) {
-  this.args = args
-
-  this.message = message
-  this.chatId = message.chat.id
-  this.userId = message.from.id
-  this.messageId = message.message_id
-  this.callbacks = callbacks
-  this.sessionId = message.sessionId
-
-}
-/*
-TLGBotMessageHandler.prototype.createMessage = function(type) {
-  switch(type) {
-    case 'LOCATION':
-      return TLGMessage.create(LOCAT)
-      new TLGLLocationMessage()
-    case 'CONTACT':
-      return new TLGLContactMessage()
-    case 'VENUE':
-      return new TLGVenueMessage()
-    case 'PHOTO':
-      return new TLGLPhotoMessage()
-    case 'AUDIO':
-      return new TLGLAudioMessage()
-    case 'TEXT':
-    default:
-      return new TLGTextMessage()
-  }
-}
-*/
-TLGBotMessageHandler.prototype.say = function(type, reqs, opts) {
-  var messageObject = TLGMessage.createMessage(type, reqs, opts)
-  if (!messageObject) return false
-  if(messageObject.class !== 'TLGBOT') return false
-  messageObject.chat_id = this.chatId
-  this.callbacks.say(messageObject)
-}
-
-
-TLGBotMessageHandler.prototype.reply = function(type, reqs, opts) {
-  console.log(type)
-  var messageObject = TLGMessage.createMessage(type, reqs, opts)
-  console.log('here!!!', messageObject)
-  if (!messageObject) return false
-  if(messageObject.class !== 'TLGBOT') return false
-  messageObject.chat_id = this.chatId
-  messageObject.user_id = this.userId
-  messageObject.option.reply_to_message_id = this.messageId
-  console.log('here?????', messageObject)
-  this.callbacks.reply(messageObject)
-}
-
-TLGBotMessageHandler.prototype.ask = function(type, reqs, opts, sessionId, callback) {
-  var messageObject = TLGMessage.createMessage(type, reqs, opts)
-  if (!messageObject) return false
-  if(messageObject.class !== 'TLGBOT') return false
-  messageObject.chat_id = this.chatId
-  messageObject.option.reply_to_message_id = this.messageId
-
-  this.callbacks.ask(messageObject, sessionId, callback)
-}
-
-class TLGMessage {
-  constructor() {
-    this.class = 'TLGBOT'
-    this.type = null
-    this.chat_id = null
-    this.user_id = null
-    this.message_id = null
-    this.reply_to_message_id = null
-    this.option = {}
-  }
-  optionAssign(option) {
-    for(var i in option) {
-      if (i in this.option) {
-        this.option[i] = option[i]
-      }
-    }
-  }
-  static createMessage(type, reqs, opts) {
-    switch(type) {
-      case 'LOCATION':
-        new TLGLLocationMessage(reqs, opts)
-      case 'CONTACT':
-        return new TLGLContactMessage(reqs, opts)
-      case 'VENUE':
-        return new TLGVenueMessage(reqs, opts)
-      case 'PHOTO':
-        return new TLGLPhotoMessage(reqs, opts)
-      case 'AUDIO':
-        return new TLGLAudioMessage(reqs, opts)
-      case 'TEXT':
-      default:
-        return new TLGTextMessage(reqs, opts)
-    }
-  }
-}
-
-class TLGTextMessage extends TLGMessage {
-  constructor(text, option={}) {
-    console.log("TEXT?", text, option)
-    if (!text) text = ""
-    super()
-    this.option = {
-      parse_mode : null,
-      disable_web_page_preview : false,
-      disable_notification : true,
-      reply_to_message_id : null,
-      reply_markup : null,
-    }
-    if (typeof text == 'string' && text.trim().length > 0 ) {
-      this.type = 'TEXT'
-      this.text = text.substring(0, 4000)
-      this.optionAssign(option)
-    } else {
-      return {}
-    }
-  }
-}
-
-class TLGLocationMessage extends TLGMessage {
-  constructor(geo={}, option={}) {
-    super()
-    this.option = {
-      disable_notification : true,
-      reply_to_message_id : null,
-      reply_markup : null,
-    }
-    if (geo.hasOwnProperty(latitude) && geo.hasOwnProperty(longitude)) {
-      this.type = 'LOCATION'
-      this.latitude = geo.latitude
-      this.longitude = geo.longitude
-      this.optionAssign(option)
-    } else {
-      return {}
-    }
-  }
-}
-class TLGVenueMessage extends TLGMessage {
-  constructor(venue={}, option={}) {
-    super()
-    this.option = {
-      foursquare_id : null,
-      disable_notification : true,
-      reply_to_message_id : null,
-      reply_markup : null,
-    }
-    var req = ['latitude', 'longitude', 'title', 'address']
-    var fail = 0
-    req.forEach((p)=>{
-      if (venue.hasOwnProperty(p)) {
-        this[p] = venue[p]
-      } else {
-        fail = 1
-      }
-    })
-
-    if (fail == 1) return {}
-
-    this.type = 'TEXT'
-    this.text = text
-    this.optionAssign(option)
-  }
-}
