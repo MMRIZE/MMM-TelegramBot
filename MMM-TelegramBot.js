@@ -148,7 +148,7 @@ Module.register("MMM-TelegramBot", {
   },
 
   TELBOT_alert: function (command, handler) {
-    var title = handler.message.from.username
+    var title = handler.message.from.first_name
     var message = handler.args
     var text = this.translate("TELBOT_ALERT_RESULT")
     this.sendNotification('SHOW_ALERT', {
@@ -282,8 +282,8 @@ Module.register("MMM-TelegramBot", {
         var c = this.commands[i]
         if (c.command == matched[1]) { // Proper command found!
           commandFound = 1
-          var restText = matched[2]
-          if (restText.trim() == '') {
+          var restText = matched[2].trim()
+          if (restText == '') {
             args = null
           } else {
             if (c.argsPattern && Array.isArray(c.argsPattern)) {
@@ -308,10 +308,18 @@ Module.register("MMM-TelegramBot", {
                       args[c.argsMapping[j]] = result
                     }
                   } else {
-                    args.push(result)
+                    if (result && result.length == 1) {
+                      args.push(result[0])
+                    } else {
+                      args.push(result)
+                    }
                   }
                 } else {
-                  args.push(result)
+                  if (result && result.length == 1) {
+                    args.push(result[0])
+                  } else {
+                    args.push(result)
+                  }
                 }
               }
             } else {
@@ -321,14 +329,20 @@ Module.register("MMM-TelegramBot", {
           if (msg.chat.id == this.config.adminChatId) {
             msg.admin = 'admin'
           }
-          var callbacks = {
-            reply: this.reply.bind(this),
-            ask: this.ask.bind(this),
-            say: this.say.bind(this)
+          if (c.callback !== 'notificationReceived') {
+            var callbacks = {
+              reply: this.reply.bind(this),
+              ask: this.ask.bind(this),
+              say: this.say.bind(this)
+            }
+            var handler = new TelegramBotMessageHandler(msg, args, callbacks)
+            c.module[c.callback].bind(c.module)
+            c.module[c.callback](c.execute, handler)
+          } else {
+            c.module[c.callback].bind(c.module)
+            c.module[c.callback](c.execute, args)
           }
-          var handler = new TelegramBotMessageHandler(msg, args, callbacks)
-          c.module[c.callback].bind(c.module)
-          c.module[c.callback](c.execute, handler)
+
         } else {
           continue
         }
@@ -401,7 +415,7 @@ Module.register("MMM-TelegramBot", {
     }
   },
 
-  notificationReceived: function (notification, payload) {
+  notificationReceived: function (notification, payload, sender) {
     switch(notification) {
       case 'ALL_MODULES_STARTED':
         if (this.isAlreadyInitialized) {
@@ -414,19 +428,30 @@ Module.register("MMM-TelegramBot", {
         MM.getModules().enumerate((m) => {
           if (m.name !== 'MMM-TelegramBot') {
             if (typeof m.getCommands == 'function') {
-              m.getCommands(new TelegramBotCommandRegister(
+              var tc = m.getCommands(new TelegramBotCommandRegister(
                 m,
                 this.registerCommand.bind(this)
               ))
+              if (Array.isArray(tc)) {
+                tc.forEach((c)=>{
+                  this.registerCommand(m, c)
+                })
+              }
             }
           }
         })
         break;
-      case 'TELBOT_TELL':
-        this.say(payload, false)
-        break;
       case 'TELBOT_TELL_ADMIN':
-        this.say(payload, true)
+        if (typeof payload == 'string') {
+          payload += "\nFrom *" + sender.name + "*"
+          var r = {
+            chat_id : null,
+            type : 'TEXT',
+            text : payload,
+            option : {parse_mode:'Markdown'}
+          }
+          this.say(r, true)
+        }
         break;
     }
   },

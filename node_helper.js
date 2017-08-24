@@ -213,6 +213,7 @@ module.exports = NodeHelper.create({
         break;
       case 'SAY_ADMIN':
         this.say(payload, true)
+        break;
       case 'ASK':
         this.ask(payload)
         break;

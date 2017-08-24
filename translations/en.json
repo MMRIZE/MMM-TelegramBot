@@ -1,6 +1,6 @@
 {
-  "TELBOT_HELPER_ERROR" : "An error is occurred. Ask to admin.",
-  "TELBOT_HELPER_NOT_ALLOWED" : "You are not allowed to command me. Ask to admin.",
+  "TELBOT_HELPER_ERROR" : "An error is occurred. Ask admin.",
+  "TELBOT_HELPER_NOT_ALLOWED" : "You are not allowed to command me. Ask admin.",
   "TELBOT_HELPER_RESTART" : "`MagicMirror` is restarted on :",
   "TELBOT_HELPER_WAKEUP" : "I've just woken from a deep sleep!",
   "TELBOT_HELPER_MSG_COMING" : "Message is coming from CHAT",
