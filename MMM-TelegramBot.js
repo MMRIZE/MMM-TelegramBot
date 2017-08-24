@@ -17,9 +17,6 @@
    }
  }
 
-
-
-
 Module.register("MMM-TelegramBot", {
   defaults: {
     allowedUser: []
@@ -89,6 +86,7 @@ Module.register("MMM-TelegramBot", {
       argsMapping : c.args_mapping,
     }
     this.commands.push(cObj)
+    return true
   },
 
   getCommands: function(Register) {
@@ -169,7 +167,7 @@ Module.register("MMM-TelegramBot", {
     })
     handler.reply("TEXT", text, {parse_mode:'Markdown'})
   },
-  
+
   TELBOT_showall: function(command, handler) {
     var text = this.translate("TELBOT_SHOWALL_RESULT")
     var lockString = this.name
@@ -277,8 +275,6 @@ Module.register("MMM-TelegramBot", {
     var chatId = msg.chat.id
     if (typeof msg.text == 'undefined') return
     var msgText = msg.text
-
-
     var matched = msgText.match(new RegExp("^\/([0-9a-zA-Z-_]+)\s?(.*)$"))
     if (matched) { // This is something like command
       var commandFound = 0
@@ -322,11 +318,9 @@ Module.register("MMM-TelegramBot", {
               args = restText
             }
           }
-
           if (msg.chat.id == this.config.adminChatId) {
             msg.admin = 'admin'
           }
-
           var callbacks = {
             reply: this.reply.bind(this),
             ask: this.ask.bind(this),
@@ -335,7 +329,6 @@ Module.register("MMM-TelegramBot", {
           var handler = new TelegramBotMessageHandler(msg, args, callbacks)
           c.module[c.callback].bind(c.module)
           c.module[c.callback](c.execute, handler)
-
         } else {
           continue
         }
@@ -386,7 +379,6 @@ Module.register("MMM-TelegramBot", {
       case 'ANSWER':
         this.askSession.forEach((s)=> {
           if (s.session_id == payload.sessionId) {
-
             var callbacks = {
               reply: this.reply.bind(this),
               ask: this.ask.bind(this),
@@ -401,7 +393,6 @@ Module.register("MMM-TelegramBot", {
             this.askSession.delete(s)
             return
           }
-
           if (moment.unix(s.time).isBefore(moment().add(-1, 'hours'))) {
             this.askSession.delete(s)
           }

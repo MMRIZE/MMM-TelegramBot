@@ -50,6 +50,7 @@ module.exports = NodeHelper.create({
           )
           if (!this.allowed.has(msg.from.username)) {
             this.say(this.notAllowedMsg(msg.message_id, msg.chat.id))
+            return
           }
           if (msg.reply_to_message) {
             var reply = msg.reply_to_message.message_id
@@ -129,7 +130,6 @@ module.exports = NodeHelper.create({
   say: function(r, adminMode=false) {
     var chatId = (adminMode) ? this.adminChatId : r.chat_id
     var self = this
-    console.log("SAY_RESPONSE", r)
     switch(r.type) {
       case 'VOICE_PATH':
         var data = fs.readFileSync(r.path);
