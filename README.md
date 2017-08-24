@@ -34,7 +34,7 @@ npm install
   module: 'MMM-TelegramBot',
   config: {
     telegramAPIKey : '<your Telegram API Token>',
-    allowedUser : ['<your Telegram username without @>'],
+    allowedUser : ['<your Telegram username without @>'], // This is NOT the username of bot.
   }
 },
 
@@ -42,8 +42,8 @@ npm install
 2. restart your `MagicMirror`.
 
 ### 4) Back to your Bot and test
-1. Back to chat room with your Bot in Telegram, try `/help` or `/commands`. Your bot will react!
-2. Now,try `/mychatid`. This command will show the id of this chat room. The `chat id` will look like `12345678`. Remember that. We will use this id for admin.
+1. Back to the chat room with your Bot in Telegram, try `/help` or `/commands`. Your bot will react!
+2. Now,try `/mychatid`. This command will show the id of this chat room. The `chat id` looks like `12345678`. Remember that. We will use this id for admin.
 
 ### 5) Register admin Chat id
 1. Open `config.js` again.
