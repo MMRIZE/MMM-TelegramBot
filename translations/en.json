@@ -21,10 +21,14 @@
   "TELBOT_SHOWALL_RESULT" : "All modules will be shown.",
   "TELBOT_ALLOWED" : "List of allowed users.",
   "TELBOT_ALLOWUSER" : "Allow user temporally. This user will lost permission after restart. You can put this user into `allowedUser` in `config.js` for permanent permission.",
-  "TELBOT_ALLOWUSER_ONLY_ADMIN" : "Only admin in his private chat with me can command this.",
+  "TELBOT_ONLY_ADMIN" : "Only admin in his private chat with me can command this.",
   "TELBOT_ALLOWUSER_REGISTERED" : "User is registered.\nTry `/allowed` for check.\nThis user will lost permission after restart.\nYou can put this user into `allowedUser` in `config.js` for permanent permission.",
   "TELBOT_ALLOWUSER_ERROR" : "I cannot register this user. check the spell or username missing.",
   "TELBOT_ALERT" : "Show alert message on your `MagicMirror`.",
   "TELBOT_ALERT_RESULT" : "I've sent your message to `MagicMirror`.",
+  "TELBOT_REBOOT" : "Reboot `MagicMirror`.",
+  "TELBOT_SHUTDOWN" : "Shutdown `MagicMirror`.",
+  "TELBOT_REBOOT_RESPONSE" : "I will reboot `MagicMirror` now.",
+  "TELBOT_SHUTDPWN_RESPONSE" : "I will shutdown `MagicMirror` now.",
   "TELBOT_END" : "end"
 }
