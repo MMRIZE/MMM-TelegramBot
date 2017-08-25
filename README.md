@@ -60,6 +60,5 @@ npm install
 3. You can get welcome message in your admin chat room. Now you can use Bot!
 
 ## More Information
-- [User Manual](https://github.com/eouia/MMM-TelegramBot/wiki/User-Manual) (For common user)
-- [How to add your commands](https://github.com/eouia/MMM-TelegramBot/wiki/How-to-add-your-commands) (For module developer)
+See the [Wiki](https://github.com/eouia/MMM-TelegramBot/wiki)
 
