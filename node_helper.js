@@ -3,6 +3,7 @@
 const moment = require('moment')
 const TelegramBot = require('node-telegram-bot-api');
 var fs = require('fs');
+var exec = require('child_process').exec;
 
 const startTime = moment()
 
@@ -220,6 +221,21 @@ module.exports = NodeHelper.create({
       case 'ALLOWEDUSER':
         this.allowed = new Set(payload)
         break;
+      case 'REBOOT':
+        execute('sudo reboot', function(callback){
+          console.log(callback);
+        });
+        break;
+      case 'SHUTDOWN':
+        execute('sudo shutdown now', function(callback){
+          console.log(callback);
+        });
+        break;
+      case 'PM2':
+        execute(('pm2 ' + payload), function(callback){
+          console.log(callback);
+        });
+        break;
     }
   },
 
@@ -259,3 +275,7 @@ module.exports = NodeHelper.create({
     }
   }
 })
+
+function execute(command, callback){
+  exec(command, function(error, stdout, stderr){ callback(stdout); });
+}

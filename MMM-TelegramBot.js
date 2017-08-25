@@ -140,8 +140,17 @@ Module.register("MMM-TelegramBot", {
         description : this.translate("TELBOT_ALERT"),
         callback : 'TELBOT_alert',
       },
+      {
+        command: 'reboot',
+        description : this.translate("TELBOT_REBOOT"),
+        callback : 'TELBOT_reboot',
+      },
+      {
+        command: 'shutdown',
+        description : this.translate("TELBOT_SHUTDOWN"),
+        callback : 'TELBOT_shutdown',
+      },
     ]
-
     defaultCommands.forEach((c) => {
       Register.add(c)
     })
@@ -192,7 +201,7 @@ Module.register("MMM-TelegramBot", {
   TELBOT_allowuser: function(command, handler) {
     var text = ""
     if (handler.message.admin !== 'admin') {
-      text = this.translate("TELBOT_ALLOWUSER_ONLY_ADMIN")
+      text = this.translate("TELBOT_ONLY_ADMIN")
     } else if (handler.args !== null) {
       var user = handler.args['username']
       this.allowed.add(user)
@@ -203,6 +212,30 @@ Module.register("MMM-TelegramBot", {
     }
 
     handler.reply("TEXT", text, {parse_mode:'Markdown'})
+  },
+
+  TELBOT_reboot: function(command, handler) {
+    var text = ""
+    if (handler.message.admin !== 'admin') {
+      text = this.translate("TELBOT_ONLY_ADMIN")
+      handler.reply("TEXT", text, {parse_mode:'Markdown'})
+    } else {
+      text = this.translate("TELBOT_REBOOT_RESPONSE")
+      handler.reply("TEXT", text, {parse_mode:'Markdown'})
+      this.sendSocketNotification('REBOOT')
+    }
+  },
+
+  TELBOT_shutdown: function(command, handler) {
+    var text = ""
+    if (handler.message.admin !== 'admin') {
+      text = this.translate("TELBOT_ONLY_ADMIN")
+      handler.reply("TEXT", text, {parse_mode:'Markdown'})
+    } else {
+      text = this.translate("TELBOT_SHUTDOWN_RESPONSE")
+      handler.reply("TEXT", text, {parse_mode:'Markdown'})
+      this.sendSocketNotification('SHUTDOWN')
+    }
   },
 
   TELBOT_mychatid: function(command, handler) {
@@ -234,11 +267,9 @@ Module.register("MMM-TelegramBot", {
       text += ((c.moduleName) ? (" - _" + c.moduleName + "_"): "")
       text += "\n"
     })
-
     if (!text) {
       text = this.translate("TELBOT_COMMANDS_ERROR")
     }
-
     handler.reply("TEXT", text, {parse_mode:'Markdown'})
   },
 
@@ -261,11 +292,9 @@ Module.register("MMM-TelegramBot", {
         }
       })
     }
-
     if (!text) {
       text = this.translate("TELBOT_HELP_HELP")
     }
-
     var result = handler.reply("TEXT", text, {parse_mode:'Markdown'})
   },
 
@@ -342,7 +371,6 @@ Module.register("MMM-TelegramBot", {
             c.module[c.callback].bind(c.module)
             c.module[c.callback](c.execute, args)
           }
-
         } else {
           continue
         }
