@@ -1,8 +1,6 @@
 # MMM-TelegramBot
 TelegramBot module for MagicMirror
 
-[Screen Shot]
-
 ## Feature
 - You can remote-control your `MagicMirror` and modules within `Telegram`.
 - The Bot is implemented in this module thus you don't need to manage antoher daemon.
