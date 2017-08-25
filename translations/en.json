@@ -29,6 +29,6 @@
   "TELBOT_REBOOT" : "Reboot `MagicMirror`.",
   "TELBOT_SHUTDOWN" : "Shutdown `MagicMirror`.",
   "TELBOT_REBOOT_RESPONSE" : "I will reboot `MagicMirror` now.",
-  "TELBOT_SHUTDPWN_RESPONSE" : "I will shutdown `MagicMirror` now.",
+  "TELBOT_SHUTDOWN_RESPONSE" : "I will shutdown `MagicMirror` now.",
   "TELBOT_END" : "end"
 }
