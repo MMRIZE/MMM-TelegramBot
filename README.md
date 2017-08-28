@@ -21,7 +21,7 @@ TelegramBot module for MagicMirror
 ```
 cd ~/MagicMirror/modules
 git clone https://github.com/eouia/MMM-TelegramBot.git
-cd modules/MMM-TelegramBot
+cd MMM-TelegramBot
 npm install
 ```
 
