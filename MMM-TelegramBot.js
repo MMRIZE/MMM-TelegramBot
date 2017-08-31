@@ -44,7 +44,7 @@ Module.register("MMM-TelegramBot", {
 
   getTranslations: function() {
     return {
-  		en: "translations/en.json",
+      en: "translations/en.json",
       de: "translations/de.json",
     }
   },
