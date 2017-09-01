@@ -30,5 +30,7 @@
   "TELBOT_SHUTDOWN" : "Fahre `MagicMirror` herunter.",
   "TELBOT_REBOOT_RESPONSE" : "Ich werde `MagicMirror` jetzt neustarten.",
   "TELBOT_SHUTDOWN_RESPONSE" : "Ich werde `MagicMirror` jetzt herunterfahren.",
+  "TELBOT_HIDDEN" : "versteckt",
+  "TELBOT_SHOWING" : "angezeigt",
   "TELBOT_END" : "Ende"
 }

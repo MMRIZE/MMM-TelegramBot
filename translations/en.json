@@ -8,7 +8,7 @@
   "TELBOT_NOT_REGISTERED_COMMAND" : "Sorry, that command is not registered.",
   "TELBOT_HELP" : "Show description of commands.\ne.g) `/help commands`.",
   "TELBOT_HELP_SERVED" : "_Served by {module}_",
-  "TELBOT_HELP_HELP" : "What can I do for you? try `/help help`",
+  "TELBOT_HELP_HELP" : "To show description of command, try `/help [command_name]`",
   "TELBOT_COMMANDS" : "List of available commands.",
   "TELBOT_COMMANDS_ERROR" : "I cannot find any command. hmmm... weird.",
   "TELBOT_MODULES" : "List of current installed modules.",
@@ -30,5 +30,7 @@
   "TELBOT_SHUTDOWN" : "Shutdown `MagicMirror`.",
   "TELBOT_REBOOT_RESPONSE" : "I will reboot `MagicMirror` now.",
   "TELBOT_SHUTDOWN_RESPONSE" : "I will shutdown `MagicMirror` now.",
+  "TELBOT_HIDDEN" : "hidden",
+  "TELBOT_SHOWING" : "showing",
   "TELBOT_END" : "end"
 }
