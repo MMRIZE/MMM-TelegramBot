@@ -279,7 +279,7 @@ Module.register("MMM-TelegramBot", {
     this.commands.forEach((c) => {
       var name = c.command
       var description = (c.description) ? c.description : ""
-      var bits = description.split(/[\.,\n]/)
+      var bits = description.split(/[\.\n]/)
       text += "*" + name + "* - _" + bits[0] + "_\n"
 
     })
