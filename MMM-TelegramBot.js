@@ -107,7 +107,7 @@ Module.register("MMM-TelegramBot", {
       {
         command: 'modules',
         description: this.translate("TELBOT_MODULES"),
-        callback : 'TELBOT_list_modules'
+        callback : 'TELBOT_list_modules',
       },
       {
         command : 'mychatid',
@@ -263,10 +263,25 @@ Module.register("MMM-TelegramBot", {
 
   TELBOT_list_commands: function(command, handler) {
     var text = ""
+    /* hmmm... I'm considering this.
+    var modules = {}
     this.commands.forEach((c) => {
-      text += "`/" + c.command + "`"
-      text += ((c.moduleName) ? (" - _" + c.moduleName + "_"): "")
-      text += "\n"
+      if (!modules[c.moduleName]) {
+        modules[c.moduleName] = "*[" + c.moduleName + "]*\n"
+      }
+      modules[c.moduleName] += "`/" + c.command + "`\n"
+       + ((c.description) ? (c.description): "") + "\n\n"
+    })
+    for(var name in modules) {
+      text += modules[name]
+    }
+    */
+    this.commands.forEach((c) => {
+      var name = c.command
+      var description = (c.description) ? c.description : ""
+      var bits = description.split(/[\.,\n]/)
+      text += "*" + name + "* - _" + bits[0] + "_\n"
+
     })
     if (!text) {
       text = this.translate("TELBOT_COMMANDS_ERROR")
