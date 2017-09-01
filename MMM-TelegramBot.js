@@ -267,9 +267,10 @@ Module.register("MMM-TelegramBot", {
   TELBOT_list_commands: function(command, handler) {
     var text = ""
     this.commands.forEach((c) => {
-      text += "`/" + c.command + "`"
-      text += ((c.moduleName) ? (" - _" + c.moduleName + "_"): "")
-      text += "\n"
+      var name = c.command
+      var description = (c.description) ? c.description : ""
+      var bits = description.split(/[\.\n]/)
+      text += "*" + name + "* - _" + bits[0] + "_\n"
     })
     if (!text) {
       text = this.translate("TELBOT_COMMANDS_ERROR")
