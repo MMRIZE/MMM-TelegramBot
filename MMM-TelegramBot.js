@@ -21,7 +21,7 @@ Module.register("MMM-TelegramBot", {
   defaults: {
     allowedUser: []
   },
-  requiresVersion: "2.1.2", // Required version of MagicMirror
+  //requiresVersion: "2.1.2", // Required version of MagicMirror
 
   start: function() {
     this.isAlreadyInitialized = 0
