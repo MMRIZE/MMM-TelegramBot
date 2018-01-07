@@ -152,6 +152,11 @@ Module.register("MMM-TelegramBot", {
         description : this.translate("TELBOT_SHUTDOWN"),
         callback : 'TELBOT_shutdown',
       },
+      {
+        command: 'dismissalerts',
+        description : this.translate("TELBOT_DISMISSALERTS"),
+        callback : 'TELBOT_dismissalerts'
+      },
     ]
     defaultCommands.forEach((c) => {
       Register.add(c)
@@ -163,12 +168,17 @@ Module.register("MMM-TelegramBot", {
     var message = handler.args
     var text = this.translate("TELBOT_ALERT_RESULT")
     this.sendNotification('SHOW_ALERT', {
-      timer:30000,
+      timer:3600000,
       title:title,
       message:message
     })
     handler.reply("TEXT", text, {parse_mode:'Markdown'})
   },
+
+TELBOT_dismissalerts: function (command, handler) {
+  this.sendNotification('HIDE_ALERT')
+  handler.reply("TEXT", text, {parse_mode:'Markdown'})
+},
 
   TELBOT_hideall: function(command, handler) {
     var text = this.translate("TELBOT_HIDEALL_RESULT")
