@@ -33,5 +33,5 @@
   "TELBOT_HIDDEN" : "hidden",
   "TELBOT_SHOWING" : "showing",
   "TELBOT_END" : "end",
-  "TELBOT_DISMISSALERTS" : "Alerts removed"
+  "TELBOT_DISMISSALERT" : "Remove Alert from Mirror"
 }

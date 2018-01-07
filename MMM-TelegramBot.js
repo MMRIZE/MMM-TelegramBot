@@ -19,7 +19,8 @@
 
 Module.register("MMM-TelegramBot", {
   defaults: {
-    allowedUser: []
+    allowedUser: [],
+    alertTimer: "30000"
   },
   //requiresVersion: "2.1.2", // Required version of MagicMirror
 
@@ -153,9 +154,9 @@ Module.register("MMM-TelegramBot", {
         callback : 'TELBOT_shutdown',
       },
       {
-        command: 'dismissalerts',
-        description : this.translate("TELBOT_DISMISSALERTS"),
-        callback : 'TELBOT_dismissalerts'
+        command: 'dismissalert',
+        description : this.translate("TELBOT_DISMISSALERT"),
+        callback : 'TELBOT_dismissalert',
       },
     ]
     defaultCommands.forEach((c) => {
@@ -164,21 +165,22 @@ Module.register("MMM-TelegramBot", {
   },
 
   TELBOT_alert: function (command, handler) {
-    var title = handler.message.from.first_name
+    var title = moment().format("LT") + " - " + handler.message.from.first_name
     var message = handler.args
+    var alerttime = this.config.alertTimer
     var text = this.translate("TELBOT_ALERT_RESULT")
     this.sendNotification('SHOW_ALERT', {
-      timer:3600000,
+      timer:alerttime,
       title:title,
       message:message
     })
     handler.reply("TEXT", text, {parse_mode:'Markdown'})
   },
 
-TELBOT_dismissalerts: function (command, handler) {
-  this.sendNotification('HIDE_ALERT')
-  handler.reply("TEXT", text, {parse_mode:'Markdown'})
-},
+  TELBOT_dismissalert: function (command, handler) {
+    this.sendNotification('HIDE_ALERT')
+    handler.reply("TEXT", text, {parse_mode:'Markdown'})
+  },
 
   TELBOT_hideall: function(command, handler) {
     var text = this.translate("TELBOT_HIDEALL_RESULT")
