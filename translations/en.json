@@ -32,5 +32,6 @@
   "TELBOT_SHUTDOWN_RESPONSE" : "I will shutdown `MagicMirror` now.",
   "TELBOT_HIDDEN" : "hidden",
   "TELBOT_SHOWING" : "showing",
-  "TELBOT_END" : "end"
+  "TELBOT_END" : "end",
+  "TELBOT_DISMISSALERT" : "Remove Alert from Mirror"
 }
