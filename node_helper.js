@@ -7,6 +7,15 @@ var exec = require('child_process').exec;
 
 const startTime = moment()
 
+var _log = function() {
+    var context = "[TELBOT]"
+    return Function.prototype.bind.call(console.log, console, context)
+}()
+
+var log = function() {
+  //do nothing
+}
+
 var NodeHelper = require("node_helper");
 
 module.exports = NodeHelper.create({
@@ -23,6 +32,8 @@ module.exports = NodeHelper.create({
   initialize: function(config) {
     this.config = config
 
+    if (this.config.verbose) log = _log
+
     if (typeof config.adminChatId !== 'undefined') {
       this.adminChatId = config.adminChatId
     }
@@ -32,20 +43,20 @@ module.exports = NodeHelper.create({
         this.TB = new TelegramBot(config.telegramAPIKey, {polling:true})
         var me = this.TB.getMe()
       } catch (err) {
-        console.log(err)
+        log(err)
       }
 
 
 
-      if (this.adminChatId) {
+      if (this.adminChatId && this.config.useWelcomeMessage) {
         this.say(this.welcomeMsg())
       }
 
       this.TB.on('message', (msg) =>{
         var time = moment.unix(msg.date)
         if (startTime.isBefore(time)) {
-          console.log(
-            "[TELBOT][" + time.format('YYYY-MM-DD HH:mm:ss')
+          log(
+            "[" + time.format('YYYY-MM-DD HH:mm:ss')
             + "]" + this.config.text["TELBOT_HELPER_MSG_COMING"]
             + ":" + msg.chat.id
           )
@@ -223,30 +234,30 @@ module.exports = NodeHelper.create({
         break;
       case 'REBOOT':
         execute('sudo reboot', function(callback){
-          console.log(callback);
+          log(callback);
         });
         break;
       case 'SHUTDOWN':
         execute('sudo shutdown now', function(callback){
-          console.log(callback);
+          log(callback);
         });
         break;
       case 'PM2':
         execute(('pm2 ' + payload), function(callback){
-          console.log(callback);
+          log(callback);
         });
         break;
     }
   },
 
   onError: function(err, response) {
-    console.log("[TELBOT] Error: " + err.code)
+    log("Error: " + err.code)
     if (typeof err.response !== 'undefined') {
-      console.log(err.response.body)
+      log(err.response.body)
     } else {
-      console.log(err)
+      log(err)
     }
-    console.log("ERR_RESPONSE", response)
+    log("ERR_RESPONSE", response)
     if (err.code !== 'EFATAL') {
       var text = '`ERROR`\n'
         + "```\n"

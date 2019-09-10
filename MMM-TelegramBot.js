@@ -20,7 +20,9 @@
 Module.register("MMM-TelegramBot", {
   defaults: {
     allowedUser: [],
-    alertTimer: "30000"
+    alertTimer: "30000",
+    useWelcomeMessage: true,
+    verbose:true,
   },
   //requiresVersion: "2.1.2", // Required version of MagicMirror
 
