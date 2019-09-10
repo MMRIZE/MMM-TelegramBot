@@ -6,6 +6,10 @@ TelegramBot module for MagicMirror
 - The Bot is implemented in this module thus you don't need to manage antoher daemon.
 - Other module developers can add their commands easily. (See the Wiki : https://github.com/eouia/MMM-TelegramBot/wiki )
 
+## Update History
+**[1.0.1] : 2019-09-10**
+- Added: `useWelcomeMessage` and `verbose`
+
 
 ## Installation
 ### 1) Create Telegram Bot
@@ -18,7 +22,7 @@ TelegramBot module for MagicMirror
 
 ### 2) Install Module
 1. In your mirror, open terminal and execute below;
-```
+```js
 cd ~/MagicMirror/modules
 git clone https://github.com/eouia/MMM-TelegramBot.git
 cd MMM-TelegramBot
@@ -27,7 +31,7 @@ npm install
 
 ### 3) Configuration (Pre-use)
 1. Open `config.js` of `MagicMirror`, add these;
-```
+```js
 {
   module: 'MMM-TelegramBot',
   config: {
@@ -45,7 +49,7 @@ npm install
 
 ### 5) Register admin Chat id
 1. Open `config.js` again.
-```
+```js
 {
   module: 'MMM-TelegramBot',
   config: {
@@ -59,6 +63,23 @@ npm install
 2. Restart your `MagicMirror`.
 3. You can get welcome message in your admin chat room. Now you can use Bot!
 
+
+## Other configuration option
+```js
+{
+  module: 'MMM-TelegramBot',
+  config: {
+    telegramAPIKey : '<your Telegram API Token>',
+    allowedUser : ['<your Telegram username without @>'],
+    adminChatId : <your admin chat id>,
+
+    useWelcomeMessage: false,
+    verbose: false,
+  }
+},
+```
+- `useWelcomeMessage` : if set as `false`, Wake-up message will not happen.
+- `verbose` : if set as `false`, log will not be logged.
+
 ## More Information
 See the [Wiki](https://github.com/eouia/MMM-TelegramBot/wiki)
-
