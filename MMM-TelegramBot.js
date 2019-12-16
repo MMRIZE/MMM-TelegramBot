@@ -490,6 +490,9 @@ Module.register("MMM-TelegramBot", {
           }
         })
         break;
+      case 'TELBOT_REGISTER_COMMAND':
+        this.registerCommand(sender, payload)
+        break
       case 'TELBOT_TELL_ADMIN':
         if (typeof payload == 'string') {
           payload += "\nFrom *" + sender.name + "*"

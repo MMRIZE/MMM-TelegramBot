@@ -7,6 +7,9 @@ TelegramBot module for MagicMirror
 - Other module developers can add their commands easily. (See the Wiki : https://github.com/eouia/MMM-TelegramBot/wiki )
 
 ## Update History
+**[1.0.2] : 2019-12-16**
+- Added: Now `command` is registrable on runtime through notification `TELBOT_REGISTER_COMMAND` 
+
 **[1.0.1] : 2019-09-10**
 - Added: `useWelcomeMessage` and `verbose`
 
