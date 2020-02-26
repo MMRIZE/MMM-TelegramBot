@@ -23,6 +23,7 @@ Module.register("MMM-TelegramBot", {
     alertTimer: "30000",
     useWelcomeMessage: true,
     verbose:true,
+    favourites:["/commands", "/modules", "/hideall", "/showall", "/alert test!"],
   },
   //requiresVersion: "2.1.2", // Required version of MagicMirror
 
@@ -98,6 +99,11 @@ Module.register("MMM-TelegramBot", {
   getCommands: function(Register) {
     var defaultCommands = [
       {
+        command: 'favor',
+        callback : 'TELBOT_favor',
+        description : this.translate("TELBOT_FAVOR"),
+      },
+      {
         command: 'help',
         callback : 'TELBOT_help',
         description : this.translate("TELBOT_HELP"),
@@ -164,6 +170,16 @@ Module.register("MMM-TelegramBot", {
     ]
     defaultCommands.forEach((c) => {
       Register.add(c)
+    })
+  },
+
+  TELBOT_favor: function (command, handler) {
+    var text = this.translate("TELBOT_FAVOR_RESULT")
+    handler.reply("TEXT", text, {
+      reply_markup: {
+        resize_keyboard:true,
+        keyboard: [this.config.favourites]
+      }
     })
   },
 
