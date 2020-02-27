@@ -44,6 +44,7 @@ Module.register("MMM-TelegramBot", {
       new TelegramBotCommandRegister(this, this.registerCommand.bind(this))
     )
     this.allowed = new Set(this.config.allowedUser)
+    this.history = []
   },
 
   getTranslations: function() {
@@ -167,6 +168,16 @@ Module.register("MMM-TelegramBot", {
         callback : 'TELBOT_favor',
         description : this.translate("TELBOT_FAVOR"),
       },
+      {
+        command: 'recent',
+        callback : 'TELBOT_recent',
+        description : this.translate("TELBOT_RECENT"),
+      },
+      {
+        command: 'resetkeyboard',
+        callback : 'TELBOT_reset_keyboard',
+        description : this.translate("TELBOT_RESET_KEYBOARD"),
+      },
     ]
     defaultCommands.forEach((c) => {
       Register.add(c)
@@ -179,6 +190,25 @@ Module.register("MMM-TelegramBot", {
       reply_markup: {
         resize_keyboard:true,
         keyboard: [this.config.favourites]
+      }
+    })
+  },
+
+  TELBOT_recent: function (command, handler) {
+    var text = this.translate("TELBOT_RECENT_RESULT")
+    handler.reply("TEXT", text, {
+      reply_markup: {
+        resize_keyboard:true,
+        keyboard: [this.history]
+      }
+    })
+  },
+
+  TELBOT_reset_keyboard: function (command, handler) {
+    var text = this.translate("TELBOT_RESET_KEYBOARD_RESULT")
+    handler.reply("TEXT", text, {
+      reply_markup: {
+        remove_keyboard:true,
       }
     })
   },
@@ -412,6 +442,10 @@ Module.register("MMM-TelegramBot", {
       } else {
         c.module[c.callback].bind(c.module)
         c.module[c.callback](c.execute, args)
+      }
+      this.history.push(msg.text)
+      while(this.history.length > 5) {
+        this.history.shift()
       }
     } else {
       //0 or multi
