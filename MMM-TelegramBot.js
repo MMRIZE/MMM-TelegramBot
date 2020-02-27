@@ -31,6 +31,7 @@ Module.register("MMM-TelegramBot", {
     this.isAlreadyInitialized = 0
     this.commands = []
     this.askSession = new Set()
+    this.commonSession = new Map()
     this.config.text = {
       "TELBOT_HELPER_ERROR" : this.translate("TELBOT_HELPER_ERROR"),
       "TELBOT_HELPER_NOT_ALLOWED" : this.translate("TELBOT_HELPER_NOT_ALLOWED"),
@@ -178,17 +179,47 @@ Module.register("MMM-TelegramBot", {
         callback : 'TELBOT_reset_keyboard',
         description : this.translate("TELBOT_RESET_KEYBOARD"),
       },
+      {
+        command: 'shell',
+        callback: 'TELBOT_shell',
+        description: this.translate("TELBOT_SHELL"),
+      }
     ]
     defaultCommands.forEach((c) => {
       Register.add(c)
     })
   },
 
+  TELBOT_shell: function (command, handler) {
+    var exec = handler.args
+    var sessionId = Date.now() + "_" + this.commonSession.size
+    if (exec) {
+      this.commonSession.set(sessionId, handler)
+      this.sendSocketNotification("SHELL", {
+        session: sessionId,
+        exec: exec
+      })
+    }
+  },
+
+  TELBOT_shell_result: function(sessionId, ret) {
+    var handler = this.commonSession.get(sessionId)
+    var text = ""
+    if (handler) {
+      this.commonSession.delete(sessionId)
+      text = this.translate("TELBOT_SHELL_RESULT") + ret
+    } else {
+      text = this.translate("TELBOT_SHELL_RESULT_SESSION_ERROR")
+    }
+    handler.reply("TEXT", text)
+  },
+
   TELBOT_favor: function (command, handler) {
     var text = this.translate("TELBOT_FAVOR_RESULT")
     handler.reply("TEXT", text, {
       reply_markup: {
-        resize_keyboard:true,
+        resize_keyboard: true,
+        one_time_keyboard: true,
         keyboard: [this.config.favourites]
       }
     })
@@ -198,7 +229,8 @@ Module.register("MMM-TelegramBot", {
     var text = this.translate("TELBOT_RECENT_RESULT")
     handler.reply("TEXT", text, {
       reply_markup: {
-        resize_keyboard:true,
+        resize_keyboard: true,
+        one_time_keyboard: true,
         keyboard: [this.history]
       }
     })
@@ -495,6 +527,8 @@ Module.register("MMM-TelegramBot", {
       case 'MESSAGE':
         this.parseCommand(payload)
         break;
+      case 'SHELL_RESULT':
+        this.TELBOT_shell_result(payload.session, payload.result)
       case 'ANSWER':
         this.askSession.forEach((s)=> {
           if (s.session_id == payload.sessionId) {

@@ -232,20 +232,17 @@ module.exports = NodeHelper.create({
         this.allowed = new Set(payload)
         break;
       case 'REBOOT':
-        execute('sudo reboot', function(callback){
-          log(callback);
-        });
+        this.shell('sudo reboot')
         break;
       case 'SHUTDOWN':
-        execute('sudo shutdown now', function(callback){
-          log(callback);
-        });
+        this.shell('sudo shutdown now')
         break;
-      case 'PM2':
-        execute(('pm2 ' + payload), function(callback){
-          log(callback);
-        });
+      case 'PM2': //? used????
+        this.shell('pm2 ' + payload)
         break;
+      case 'SHELL':
+        this.shell(payload.exec, payload.session)
+        break
     }
   },
 
@@ -283,9 +280,27 @@ module.exports = NodeHelper.create({
       this.say(msg)
       //console.log(msg)
     }
-  }
-})
+  },
 
-function execute(command, callback){
-  exec(command, function(error, stdout, stderr){ callback(stdout); });
-}
+  shell: function(command, sessionId=null, callback=null){
+    if (callback == null) {
+      callback = (ret, session) => {
+        if (ret.length > 3000) {
+          ret = ret.slice(0, 3000) + " ..."
+        }
+        this.sendSocketNotification("SHELL_RESULT", {
+          session: session,
+          result: ret
+        })
+      }
+    }
+    log("SHELL:", command)
+    exec(command, function(error, stdout, stderr){
+      var result = stdout
+      if (error) { result = error.message}
+      log("SHELL RESULT:", result)
+      callback(result, sessionId)
+    })
+  },
+
+})

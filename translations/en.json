@@ -40,5 +40,8 @@
   "TELBOT_RECENT": "Load recent used commands as keyboard",
   "TELBOT_RECENT_RESULT": "Select command from Keyboard",
   "TELBOT_RESET_KEYBOARD": "Reset Kyeboard",
-  "TELBOT_RESET_KEYBOARD_RESULT": "Keyboard is reset"
+  "TELBOT_RESET_KEYBOARD_RESULT": "Keyboard is reset",
+  "TELBOT_SHELL": "Execute shell script/command directly.(Use carefully)",
+  "TELBOT_SHELL_RESULT": "Executed:\n",
+  "TELBOT_SHELL_RESULT_SESSION_ERROR": "Execution fails by some reason. Sorry."
 }
