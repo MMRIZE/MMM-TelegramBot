@@ -99,11 +99,6 @@ Module.register("MMM-TelegramBot", {
   getCommands: function(Register) {
     var defaultCommands = [
       {
-        command: 'favor',
-        callback : 'TELBOT_favor',
-        description : this.translate("TELBOT_FAVOR"),
-      },
-      {
         command: 'help',
         callback : 'TELBOT_help',
         description : this.translate("TELBOT_HELP"),
@@ -166,6 +161,11 @@ Module.register("MMM-TelegramBot", {
         command: 'dismissalert',
         description : this.translate("TELBOT_DISMISSALERT"),
         callback : 'TELBOT_dismissalert',
+      },
+      {
+        command: 'favor',
+        callback : 'TELBOT_favor',
+        description : this.translate("TELBOT_FAVOR"),
       },
     ]
     defaultCommands.forEach((c) => {
@@ -341,88 +341,94 @@ Module.register("MMM-TelegramBot", {
     var chatId = msg.chat.id
     if (typeof msg.text == 'undefined') return
     var msgText = msg.text
+    if (msgText.indexOf("/") !== 0) return
     var matched = msgText.match(new RegExp("^\/([0-9a-zA-Z-_]+)\s?(.*)$"))
-    if (matched) { // This is something like command
-      var commandFound = 0
-      for (var i in this.commands) {
-        var c = this.commands[i]
-        if (c.command == matched[1]) { // Proper command found!
-          commandFound = 1
-          var restText = matched[2].trim()
-          if (restText == '') {
-            args = null
-          } else {
-            if (c.argsPattern && Array.isArray(c.argsPattern)) {
-              args = []
-              for(var j = 0; j < c.argsPattern.length; j++) {
-                var p = c.argsPattern[j]
-                if (p instanceof RegExp) {
-                  //do nothing.
+    var matchedCommands = []
+    if (matched) {
+      matchedCommands = this.commands.filter((c)=>{
+        if (c.command.indexOf(matched[1]) == 0) return true
+        return false
+      })
+    }
+    if (matchedCommands.length == 1) {
+      //proper
+      var c = matchedCommands[0]
+      var restText = matched[2].trim()
+      if (restText == '') {
+        args = null
+      } else {
+        if (c.argsPattern && Array.isArray(c.argsPattern)) {
+          args = []
+          for(var j = 0; j < c.argsPattern.length; j++) {
+            var p = c.argsPattern[j]
+            if (p instanceof RegExp) {
+              //do nothing.
+            } else {
+              if (typeof p == 'string') {
+                p = p.toRegExp()
+              } else {
+                p = /.*/
+              }
+            }
+            var result = p.exec(restText.trim())
+            if (c.argsMapping && Array.isArray(c.argsMapping)) {
+              if (typeof c.argsMapping[j] !== 'undefined') {
+                if (result && result.length == 1) {
+                  args[c.argsMapping[j]] = result[0]
                 } else {
-                  if (typeof p == 'string') {
-                    p = p.toRegExp()
-                  } else {
-                    p = /.*/
-                  }
+                  args[c.argsMapping[j]] = result
                 }
-                var result = p.exec(restText.trim())
-                if (c.argsMapping && Array.isArray(c.argsMapping)) {
-                  if (typeof c.argsMapping[j] !== 'undefined') {
-                    if (result && result.length == 1) {
-                      args[c.argsMapping[j]] = result[0]
-                    } else {
-                      args[c.argsMapping[j]] = result
-                    }
-                  } else {
-                    if (result && result.length == 1) {
-                      args.push(result[0])
-                    } else {
-                      args.push(result)
-                    }
-                  }
+              } else {
+                if (result && result.length == 1) {
+                  args.push(result[0])
                 } else {
-                  if (result && result.length == 1) {
-                    args.push(result[0])
-                  } else {
-                    args.push(result)
-                  }
+                  args.push(result)
                 }
               }
             } else {
-              args = restText
+              if (result && result.length == 1) {
+                args.push(result[0])
+              } else {
+                args.push(result)
+              }
             }
-          }
-          if (msg.chat.id == this.config.adminChatId) {
-            msg.admin = 'admin'
-          }
-          if (c.callback !== 'notificationReceived') {
-            var callbacks = {
-              reply: this.reply.bind(this),
-              ask: this.ask.bind(this),
-              say: this.say.bind(this)
-            }
-            var handler = new TelegramBotMessageHandler(msg, args, callbacks)
-            c.module[c.callback].bind(c.module)
-            c.module[c.callback](c.execute, handler)
-          } else {
-            c.module[c.callback].bind(c.module)
-            c.module[c.callback](c.execute, args)
           }
         } else {
-          continue
+          args = restText
         }
       }
-      if (commandFound == 0) {
+      if (msg.chat.id == this.config.adminChatId) {
+        msg.admin = 'admin'
+      }
+      if (c.callback !== 'notificationReceived') {
         var callbacks = {
           reply: this.reply.bind(this),
           ask: this.ask.bind(this),
           say: this.say.bind(this)
         }
-        var handler = new TelegramBotMessageHandler(msg, null, callbacks)
-        handler.reply("TEXT", this.translate("TELBOT_NOT_REGISTERED_COMMAND"))
+        var handler = new TelegramBotMessageHandler(msg, args, callbacks)
+        c.module[c.callback].bind(c.module)
+        c.module[c.callback](c.execute, handler)
+      } else {
+        c.module[c.callback].bind(c.module)
+        c.module[c.callback](c.execute, args)
       }
     } else {
-      // do nothing. This is not command
+      //0 or multi
+      var callbacks = {
+        reply: this.reply.bind(this),
+        ask: this.ask.bind(this),
+        say: this.say.bind(this)
+      }
+      var handler = new TelegramBotMessageHandler(msg, null, callbacks)
+      var text = this.translate("TELBOT_NOT_REGISTERED_COMMAND")
+      if (matchedCommands.length > 1) {
+        text = this.translate("TELBOT_FOUND_SEVERAL_COMMANDS")
+        for (var tc of matchedCommands) {
+          text += `*/${tc.command}*\n`
+        }
+      }
+      handler.reply("TEXT", text, {parse_mode:"Markdown"})
     }
   },
 
