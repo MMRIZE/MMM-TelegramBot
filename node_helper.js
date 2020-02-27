@@ -46,8 +46,6 @@ module.exports = NodeHelper.create({
         log(err)
       }
 
-
-
       if (this.adminChatId && this.config.useWelcomeMessage) {
         this.say(this.welcomeMsg())
       }

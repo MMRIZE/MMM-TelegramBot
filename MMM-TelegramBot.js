@@ -24,12 +24,27 @@ Module.register("MMM-TelegramBot", {
     useWelcomeMessage: true,
     verbose:true,
     favourites:["/commands", "/modules", "/hideall", "/showall", "/alert test!"],
+    customCommands:[
+      {
+        command: "test",
+        callback: (command, handler, thisModule) => {
+          handler.reply("TEXT", "oops!" + thisModule.name)
+        }
+      },
+      {
+        command: "test",
+        callback: (command, handler, thisModule) => {
+          handler.reply("TEXT", "wow!" + thisModule.name)
+        }
+      }
+    ]
   },
   //requiresVersion: "2.1.2", // Required version of MagicMirror
 
   start: function() {
     this.isAlreadyInitialized = 0
     this.commands = []
+    this.customCommandCallbacks = new Map()
     this.askSession = new Set()
     this.commonSession = new Map()
     this.config.text = {
@@ -67,7 +82,10 @@ Module.register("MMM-TelegramBot", {
     var moduleName = module.name
 
     var callback = ((c.callback) ? (c.callback) : 'notificationReceived')
-    if (typeof module[callback] !== 'function') return false
+    if (typeof callback !== "function") {
+      if (typeof module[callback] !== 'function') return false
+    }
+
 
     var isNameUsed = 1
     var idx = 0
@@ -183,11 +201,44 @@ Module.register("MMM-TelegramBot", {
         command: 'shell',
         callback: 'TELBOT_shell',
         description: this.translate("TELBOT_SHELL"),
-      }
+      },
+      {
+        command: 'notification',
+        callback: 'TELBOT_noti',
+        description: this.translate("TELBOT_NOTIFICATION"),
+        args_pattern: [/([^\s]+)\s?([^\s]?.*|)$/]
+      },
     ]
     defaultCommands.forEach((c) => {
       Register.add(c)
     })
+    this.config.customCommands.forEach((c)=>{
+      Register.add(c)
+    })
+  },
+
+  TELBOT_noti: function(command, handler) {
+    var error = null
+    if (!handler.args || !handler.args[0]) {
+      var text = this.translate("TELBOT_NOTIFICATION_FAIL")
+      handler.reply("TEXT", text)
+      return
+    }
+    var noti = handler.args[0][1]
+    var pstr = handler.args[0][2]
+    var payload = pstr
+    if (pstr.indexOf("{") + pstr.indexOf("[") !== -2) {
+      try {
+        payload = JSON.parse(pstr)
+      } catch (e) {
+        var text = this.translate("TELBOT_NOTIFICATION_PAYLOAD_FAIL")
+        text += "\n" + "`" + payload + "`"
+        handler.reply("TEXT", text, {parse_mode:"Markdown"})
+        return
+      }
+    }
+    this.sendNotification(noti, payload)
+    handler.reply("TEXT", this.translate("TELBOT_NOTIFICATION_RESULT"))
   },
 
   TELBOT_shell: function (command, handler) {
@@ -411,6 +462,15 @@ Module.register("MMM-TelegramBot", {
         if (c.command.indexOf(matched[1]) == 0) return true
         return false
       })
+      if (matchedCommands.length > 1) {
+        var exact = matchedCommands.filter((c)=>{
+          if (c.command == matched[1]) return true
+          return false
+        })
+        if (exact.length == 1) {
+          matchedCommands = exact
+        }
+      }
     }
     if (matchedCommands.length == 1) {
       //proper
@@ -469,8 +529,12 @@ Module.register("MMM-TelegramBot", {
           say: this.say.bind(this)
         }
         var handler = new TelegramBotMessageHandler(msg, args, callbacks)
-        c.module[c.callback].bind(c.module)
-        c.module[c.callback](c.execute, handler)
+        if (typeof c.callback == "function") {
+          c.callback(c.execute, handler, c.module)
+        } else {
+          c.module[c.callback].bind(c.module)
+          c.module[c.callback](c.execute, handler, c.module)
+        }
       } else {
         c.module[c.callback].bind(c.module)
         c.module[c.callback](c.execute, args)
@@ -563,7 +627,6 @@ Module.register("MMM-TelegramBot", {
         this.isAlreadyInitialized = 1
         this.sendSocketNotification('ALLOWEDUSER', [...this.allowed])
         var commands = []
-        var self = this
         MM.getModules().enumerate((m) => {
           if (m.name !== 'MMM-TelegramBot') {
             if (typeof m.getCommands == 'function') {
@@ -579,7 +642,7 @@ Module.register("MMM-TelegramBot", {
             }
           }
         })
-        break;
+        break
       case 'TELBOT_REGISTER_COMMAND':
         this.registerCommand(sender, payload)
         break
@@ -594,7 +657,7 @@ Module.register("MMM-TelegramBot", {
           }
           this.say(r, true)
         }
-        break;
+        break
     }
   },
 })

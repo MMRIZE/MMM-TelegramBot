@@ -36,12 +36,16 @@
   "TELBOT_DISMISSALERT" : "Remove Alert from Mirror",
   "TELBOT_FAVOR" : "Load favourite commands as keyboard",
   "TELBOT_FAVOR_RESULT" : "Select command from Keyboard",
-  "TELBOT_FOUND_SEVERAL_COMMANDS": "Several commands are searched. Your intention might be:\n",
+  "TELBOT_FOUND_SEVERAL_COMMANDS": "Several commands are searched. Your intention might be one of these:\n",
   "TELBOT_RECENT": "Load recent used commands as keyboard",
   "TELBOT_RECENT_RESULT": "Select command from Keyboard",
   "TELBOT_RESET_KEYBOARD": "Reset Kyeboard",
   "TELBOT_RESET_KEYBOARD_RESULT": "Keyboard is reset",
   "TELBOT_SHELL": "Execute shell script/command directly.(Use carefully)",
   "TELBOT_SHELL_RESULT": "Executed:\n",
-  "TELBOT_SHELL_RESULT_SESSION_ERROR": "Execution fails by some reason. Sorry."
+  "TELBOT_SHELL_RESULT_SESSION_ERROR": "Execution fails by some reason. Sorry.",
+  "TELBOT_NOTIFICATION": "Send custom notification\ne.g: ``` /notification SHOW_ALERT {\"title\":\"hello\", \"timer\":1000}```",
+  "TELBOT_NOTIFICATION_RESULT": "Notification emitted.",
+  "TELBOT_NOTIFICATION_FAIL": "Invalid arguments.",
+  "TELBOT_NOTIFICATION_PAYLOAD_FAIL": "Notification payload is not proper."
 }
