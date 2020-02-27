@@ -55,10 +55,9 @@ module.exports = NodeHelper.create({
       this.TB.on('message', (msg) =>{
         var time = moment.unix(msg.date)
         if (startTime.isBefore(time)) {
-          log(
-            "[" + time.format('YYYY-MM-DD HH:mm:ss')
-            + "]" + this.config.text["TELBOT_HELPER_MSG_COMING"]
+          log(this.config.text["TELBOT_HELPER_MSG_COMING"]
             + ":" + msg.chat.id
+            + " > " + msg.text
           )
           if (!this.allowed.has(msg.from.username)) {
             this.say(this.notAllowedMsg(msg.message_id, msg.chat.id))

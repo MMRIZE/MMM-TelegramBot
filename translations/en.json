@@ -34,6 +34,7 @@
   "TELBOT_SHOWING" : "showing",
   "TELBOT_END" : "end",
   "TELBOT_DISMISSALERT" : "Remove Alert from Mirror",
-  "TELBOT_FAVOR" : "Load my favourite commands as keyboard",
-  "TELBOT_FAVOR_RESULT" : "Select Your command"
+  "TELBOT_FAVOR" : "Load favourite commands as keyboard",
+  "TELBOT_FAVOR_RESULT" : "Select command",
+  "TELBOT_FOUND_SEVERAL_COMMANDS": "Several commands are searched. Your intention might be:\n"
 }
