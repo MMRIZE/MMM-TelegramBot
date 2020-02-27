@@ -1,9 +1,10 @@
 'use strict'
 
 const moment = require('moment')
-const TelegramBot = require('node-telegram-bot-api');
-var fs = require('fs');
-var exec = require('child_process').exec;
+const TelegramBot = require('node-telegram-bot-api')
+const fs = require('fs')
+const exec = require('child_process').exec
+const path = require('path')
 
 const startTime = moment()
 
@@ -40,7 +41,8 @@ module.exports = NodeHelper.create({
 
     if (typeof config.telegramAPIKey !== 'undefined') {
       try {
-        this.TB = new TelegramBot(config.telegramAPIKey, {polling:true})
+        var option = Object.assign({polling:true}, config.detailOption)
+        this.TB = new TelegramBot(config.telegramAPIKey, option)
         var me = this.TB.getMe()
       } catch (err) {
         log(err)
@@ -241,6 +243,9 @@ module.exports = NodeHelper.create({
       case 'SHELL':
         this.shell(payload.exec, payload.session)
         break
+      case 'SCREENSHOT':
+        this.screenshot(payload.session)
+        break
     }
   },
 
@@ -300,5 +305,38 @@ module.exports = NodeHelper.create({
       callback(result, sessionId)
     })
   },
+
+  screenshot: function(sessionId = null, callback=null) {
+    var command = this.config.screenshotScript + " screenshot.png"
+    var t = new moment()
+    var retObj = {
+      session: sessionId,
+      timestamp: t.format("YYYY/MM/DD HH:mm:ss"),
+      path: path.resolve("screenshot.png"),
+      result: "",
+      status: false
+    }
+    if (callback == null) {
+      callback = (ret, session) => {
+        if (ret.length > 3000) {
+          ret = ret.slice(0, 3000) + " ..."
+        }
+        retObj.ret = ret
+        this.sendSocketNotification("SCREENSHOT_RESULT", retObj)
+      }
+    }
+    log("SCREENSHOT:", command)
+    exec(command, function(error, stdout, stderr){
+      var result = stdout
+      if (error) {
+        retObj.result = error.message
+        result = error.message
+      } else {
+        retObj.status = true
+      }
+      log("SCREENSHOT RESULT:", result)
+      callback(result, sessionId)
+    })
+  }
 
 })

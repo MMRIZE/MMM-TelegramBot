@@ -6,13 +6,24 @@ TelegramBot module for MagicMirror
 - The Bot is implemented in this module thus you don't need to manage antoher daemon.
 - Other module developers can add their commands easily. (See the Wiki : https://github.com/eouia/MMM-TelegramBot/wiki )
 
-## Update History
-**[1.0.2] : 2019-12-16**
-- Added: Now `command` is registrable on runtime through notification `TELBOT_REGISTER_COMMAND` 
+## New Updates
+**[1.1.0] 2020-02-27**
+- added: new commands
+  - **`/recent`** : load telegram keyboard for recent used commands
+  - **`/favor`** : load telegram keyboard for favorite commands
+  - **`/shell`** : execute shell script or shell command (e.g: `/shell echo hello world`)
+  - **`/notification`** : emit MagicMirror notification (e.g: `/notification SHOW_ALERT {"title":"test", "timer":1000}`)
+  - **`/screenshot`** : take a screenshot of MagicMirror
+  > I will remove screenshot feature from `MMM-Tools` on next updates at near future, so use this instead.
 
-**[1.0.1] : 2019-09-10**
-- Added: `useWelcomeMessage` and `verbose`
+- added: new features
+  - custom command by user available.
+  - abbreviation of command available (e.g: You can use just `/noti` or `/n` instead of full `/notification`)
+  - detail option of telegramBot constructor(API) available. (e.g: proxy setting) - experimental
 
+- changed: kinder logging message.
+- changed: `parse_mode:"MarkdownV2"` is supported.(natively by API)
+- **Some translate files are not completed. Please PR for others.**
 
 ## Installation
 ### 1) Create Telegram Bot
@@ -78,11 +89,30 @@ npm install
 
     useWelcomeMessage: false,
     verbose: false,
+
+    /** added since 1.1.0 **/
+    favourites:["/commands", "/modules", "/hideall", "/showall"],
+    screenshotScript: "scrot",
+    detailOption: {},
+    customCommands: []
   }
 },
 ```
 - `useWelcomeMessage` : if set as `false`, Wake-up message will not happen.
 - `verbose` : if set as `false`, log will not be logged.
+- `favourites` : put your favourite commands to telegram keyboard. They will be loaded by command `/favor`
+- `screenshotScript` : set your screencapture program(if needed with option parameters but not target filename. The filename will be added in the end of this command automatically.) if set as null, `/screenshot` will not work.
+> If you are using another platform, find a proper screencapture program for your environment. (e.g: for OSX, `screencapture` will be valid.)
+
+- `detailOption` : For Developer/Expert. Set detail options for `note-telegram-bot-api` constructor (https://github.com/yagop/node-telegram-bot-api/blob/5169d79bd92495d169f9e49302b9f5c630c6ccfc/src/telegram.js#L186)
+- `customCommands` : You can add your own command (Finally!!!)
+
+## Update History
+**[1.0.2] : 2019-12-16**
+- Added: Now `command` is registrable on runtime through notification `TELBOT_REGISTER_COMMAND`
+
+**[1.0.1] : 2019-09-10**
+- Added: `useWelcomeMessage` and `verbose`
 
 ## More Information
 See the [Wiki](https://github.com/eouia/MMM-TelegramBot/wiki)

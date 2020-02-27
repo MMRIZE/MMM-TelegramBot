@@ -23,21 +23,18 @@ Module.register("MMM-TelegramBot", {
     alertTimer: "30000",
     useWelcomeMessage: true,
     verbose:true,
-    favourites:["/commands", "/modules", "/hideall", "/showall", "/alert test!"],
-    customCommands:[
-      {
-        command: "test",
-        callback: (command, handler, thisModule) => {
-          handler.reply("TEXT", "oops!" + thisModule.name)
-        }
-      },
-      {
-        command: "test",
-        callback: (command, handler, thisModule) => {
-          handler.reply("TEXT", "wow!" + thisModule.name)
-        }
+    screenshotScript: "scrot",
+    detailOption: {},
+    //if you want this module to work behind local proxy, try this. (experimental)
+    /*
+    detailOption: {
+      request: {
+        proxy: "https://someone:somepassword@local.proxy.addr:1234",
       }
-    ]
+    }
+    */
+    favourites:["/commands", "/modules", "/hideall", "/showall"],
+    customCommands:[]
   },
   //requiresVersion: "2.1.2", // Required version of MagicMirror
 
@@ -208,6 +205,11 @@ Module.register("MMM-TelegramBot", {
         description: this.translate("TELBOT_NOTIFICATION"),
         args_pattern: [/([^\s]+)\s?([^\s]?.*|)$/]
       },
+      {
+        command: 'screenshot',
+        callback: 'TELBOT_screenshot',
+        description: this.translate("TELBOT_SCREENSHOT"),
+      },
     ]
     defaultCommands.forEach((c) => {
       Register.add(c)
@@ -217,11 +219,35 @@ Module.register("MMM-TelegramBot", {
     })
   },
 
+  TELBOT_screenshot: function(command, handler) {
+    if (!this.config.screenshotScript) {
+      var text = this.translate("TELBOT_SCREENSHOT_NULL")
+      handler.reply("TEXT", text, {parse_mode:"Markdown"})
+      return
+    }
+    var sessionId = Date.now() + "_" + this.commonSession.size
+    this.commonSession.set(sessionId, handler)
+    this.sendSocketNotification("SCREENSHOT", {session: sessionId})
+  },
+
+  TELBOT_screenshot_result: function(sessionId, ret) {
+    var handler = this.commonSession.get(sessionId)
+    var text = ""
+    if (handler && ret.status) {
+      this.commonSession.delete(sessionId)
+      text = this.translate("TELBOT_SCREENSHOT_RESULT") + ret.timestamp
+      handler.reply("PHOTO_PATH", ret.path, {caption: text})
+    } else {
+      text = this.translate("TELBOT_SCREENSHOT_RESULT_ERROR") + "\n" + ret.result
+      handler.reply("TEXT", text, {parse_mode:"Markdown"})
+    }
+  },
+
   TELBOT_noti: function(command, handler) {
     var error = null
     if (!handler.args || !handler.args[0]) {
       var text = this.translate("TELBOT_NOTIFICATION_FAIL")
-      handler.reply("TEXT", text)
+      handler.reply("TEXT", text, {parse_mode:"Markdown"})
       return
     }
     var noti = handler.args[0][1]
@@ -238,7 +264,7 @@ Module.register("MMM-TelegramBot", {
       }
     }
     this.sendNotification(noti, payload)
-    handler.reply("TEXT", this.translate("TELBOT_NOTIFICATION_RESULT"))
+    handler.reply("TEXT", this.translate("TELBOT_NOTIFICATION_RESULT"), {parse_mode:"Markdown"})
   },
 
   TELBOT_shell: function (command, handler) {
@@ -262,7 +288,7 @@ Module.register("MMM-TelegramBot", {
     } else {
       text = this.translate("TELBOT_SHELL_RESULT_SESSION_ERROR")
     }
-    handler.reply("TEXT", text)
+    handler.reply("TEXT", text, {parse_mode:"Markdown"})
   },
 
   TELBOT_favor: function (command, handler) {
@@ -272,7 +298,8 @@ Module.register("MMM-TelegramBot", {
         resize_keyboard: true,
         one_time_keyboard: true,
         keyboard: [this.config.favourites]
-      }
+      },
+      parse_mode:"Markdown"
     })
   },
 
@@ -283,7 +310,8 @@ Module.register("MMM-TelegramBot", {
         resize_keyboard: true,
         one_time_keyboard: true,
         keyboard: [this.history]
-      }
+      },
+      parse_mode:"Markdown"
     })
   },
 
@@ -292,7 +320,8 @@ Module.register("MMM-TelegramBot", {
     handler.reply("TEXT", text, {
       reply_markup: {
         remove_keyboard:true,
-      }
+      },
+      parse_mode:"Markdown"
     })
   },
 
@@ -415,7 +444,7 @@ Module.register("MMM-TelegramBot", {
       var name = c.command
       var description = (c.description) ? c.description : ""
       var bits = description.split(/[\.\n]/)
-      text += "*" + name + "* - _" + bits[0] + "_\n"
+      text += "*" + name + "* \- _" + bits[0] + "_\n"
     })
     if (!text) {
       text = this.translate("TELBOT_COMMANDS_ERROR")
@@ -590,9 +619,13 @@ Module.register("MMM-TelegramBot", {
     switch (notification) {
       case 'MESSAGE':
         this.parseCommand(payload)
-        break;
+        break
       case 'SHELL_RESULT':
         this.TELBOT_shell_result(payload.session, payload.result)
+        break
+      case 'SCREENSHOT_RESULT':
+        this.TELBOT_screenshot_result(payload.session, payload)
+        break
       case 'ANSWER':
         this.askSession.forEach((s)=> {
           if (s.session_id == payload.sessionId) {
@@ -614,7 +647,7 @@ Module.register("MMM-TelegramBot", {
             this.askSession.delete(s)
           }
         })
-      break;
+      break
     }
   },
 

@@ -47,5 +47,9 @@
   "TELBOT_NOTIFICATION": "Send custom notification\ne.g: ``` /notification SHOW_ALERT {\"title\":\"hello\", \"timer\":1000}```",
   "TELBOT_NOTIFICATION_RESULT": "Notification emitted.",
   "TELBOT_NOTIFICATION_FAIL": "Invalid arguments.",
-  "TELBOT_NOTIFICATION_PAYLOAD_FAIL": "Notification payload is not proper."
+  "TELBOT_NOTIFICATION_PAYLOAD_FAIL": "Notification payload is not proper.",
+  "TELBOT_SCREENSHOT": "Take a screenshot of MagicMirror.",
+  "TELBOT_SCREENSHOT_NULL": "You didn't set script name for this feature.",
+  "TELBOT_SCREENSHOT_RESULT": "Captured : ",
+  "TELBOT_SCREENSHOT_RESULT_ERROR": "Screenshot is not captured.:"
 }
