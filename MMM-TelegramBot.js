@@ -689,6 +689,9 @@ Module.register("MMM-TelegramBot", {
             option : {parse_mode:'Markdown'}
           }
           this.say(r, true)
+        } else if (typeof payload == "object") {
+          var r = Object.assign({}, payload, {chat_id:null})
+          this.say(r, true)
         }
         break
     }
