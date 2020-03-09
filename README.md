@@ -7,6 +7,9 @@ TelegramBot module for MagicMirror
 - Other module developers can add their commands easily. (See the Wiki : https://github.com/eouia/MMM-TelegramBot/wiki )
 
 ## New Updates
+**[1.1.1] 2020-03-09**
+- changed: `TELBOT_TELL_ADMIN` can get rich format.
+
 **[1.1.0] 2020-02-27**
 - added: new commands
   - **`/recent`** : load telegram keyboard for recent used commands
