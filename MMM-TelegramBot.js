@@ -34,7 +34,11 @@ Module.register("MMM-TelegramBot", {
     }
     */
     favourites:["/commands", "/modules", "/hideall", "/showall"],
-    customCommands:[]
+    customCommands:[],
+    telecast: null, // true or chat_id
+    telecastLife: 1000 * 60 * 60 * 6,
+    telecastLimit: 5,
+    telecastHideOverflow: true,
   },
   //requiresVersion: "2.1.2", // Required version of MagicMirror
 
@@ -58,6 +62,7 @@ Module.register("MMM-TelegramBot", {
     )
     this.allowed = new Set(this.config.allowedUser)
     this.history = []
+    this.chats = []
   },
 
   getTranslations: function() {
@@ -69,6 +74,10 @@ Module.register("MMM-TelegramBot", {
     }
   },
 
+  getStyles: function() {
+    return ["MMM-TelegramBot.css"]
+  },
+
   getScripts: function() {
     return ["TELBOT_lib.js"]
   },
@@ -77,13 +86,10 @@ Module.register("MMM-TelegramBot", {
     var c = commandObj
     var command = c.command
     var moduleName = module.name
-
     var callback = ((c.callback) ? (c.callback) : 'notificationReceived')
     if (typeof callback !== "function") {
       if (typeof module[callback] !== 'function') return false
     }
-
-
     var isNameUsed = 1
     var idx = 0
     for (var j in this.commands) {
@@ -98,7 +104,6 @@ Module.register("MMM-TelegramBot", {
         isNameUsed = 0
       }
     }
-
     var cObj = {
       command : command,
       execute : c.command,
@@ -210,6 +215,11 @@ Module.register("MMM-TelegramBot", {
         callback: 'TELBOT_screenshot',
         description: this.translate("TELBOT_SCREENSHOT"),
       },
+      {
+        command: 'telecast',
+        callback: 'TELBOT_telecast',
+        description: this.translate("TELBOT_TELECAST"),
+      }
     ]
     defaultCommands.forEach((c) => {
       Register.add(c)
@@ -217,6 +227,17 @@ Module.register("MMM-TelegramBot", {
     this.config.customCommands.forEach((c)=>{
       Register.add(c)
     })
+  },
+
+  TELBOT_telecast: function(command, handler) {
+    if (!this.config.telecast) {
+      var text = this.translate("TELBOT_TELECAST_FALSE")
+      handler.reply("TEXT", text, {parse_mode:"Markdown"})
+      return
+    }
+    handler.message.text = handler.args
+    handler.message.caption = handler.args
+    this.sendSocketNotification("FORCE_TELECAST", handler.message)
   },
 
   TELBOT_screenshot: function(command, handler) {
@@ -615,9 +636,110 @@ Module.register("MMM-TelegramBot", {
     }
   },
 
+  telecast: function(msgObj) {
+    if (!msgObj.text && !msgObj.photo) return
+    while (this.chats.length >= this.config.telecastLimit) {
+      this.chats.shift()
+    }
+    this.chats.push(msgObj)
+    var dom = document.querySelector("#TELBOT .container")
+
+    while(dom.childNodes.length >= this.config.telecastLimit + 1) {
+      if (dom.firstChild.id !== "TELBOT_ANCHOR") dom.removeChild(dom.firstChild)
+    }
+    this.appendTelecastChat(dom, msgObj)
+    var dom = document.querySelector("#TELBOT .container")
+    var anchor = document.querySelector("#TELBOT_ANCHOR")
+    anchor.scrollIntoView(false)
+  },
+
+  getDom: function() {
+    var dom = document.createElement("div")
+    dom.id = "TELBOT"
+    if (this.config.telecast) {
+      dom.appendChild(this.getTelecastDom())
+    }
+    return dom
+  },
+
+  appendTelecastChat: function(parent, c) {
+    const getImageURL = (id)=>{
+      return "/modules/MMM-TelegramBot/cache/" + id
+    }
+    var anchor = parent.querySelector("#TELBOT_ANCHOR")
+    var chat = document.createElement("div")
+    chat.classList.add("chat")
+    var from = document.createElement("div")
+    from.classList.add("from")
+    var profile = document.createElement("div")
+    profile.classList.add("profile")
+    if (c.from._photo) {
+      var profileImage = document.createElement("img")
+      profileImage.classList.add("profileImage")
+      profileImage.src = getImageURL(c.from._photo)
+      profile.appendChild(profileImage)
+    } else {
+      profile.innerHTML = c.from.first_name.substring(0, 1)
+    }
+    from.appendChild(profile)
+    chat.appendChild(from)
+    var message = document.createElement("div")
+    message.classList.add("message")
+    var bubble = document.createElement("div")
+    bubble.classList.add("bubble")
+    //reply
+    if (c.chat._photo) {
+      var photo = document.createElement("div")
+      photo.classList.add("photo")
+      var background = document.createElement("div")
+      background.classList.add("background")
+      background.style.backgroundImage = `url(${getImageURL(c.chat._photo)})`
+      photo.appendChild(background)
+      var imageContainer = document.createElement("div")
+      imageContainer.classList.add("imageContainer")
+      var photoImage = document.createElement("img")
+      photoImage.classList.add("photoImage")
+      photoImage.src = getImageURL(c.chat._photo)
+      photoImage.onload = ()=>{
+        anchor.scrollIntoView(false)
+      }
+      imageContainer.appendChild(photoImage)
+      photo.appendChild(imageContainer)
+      bubble.appendChild(photo)
+    }
+    if (c.text) {
+      var text = document.createElement("div")
+      text.classList.add("text")
+      text.innerHTML = c.text
+      bubble.appendChild(text)
+    }
+    message.appendChild(bubble)
+    chat.appendChild(message)
+    chat.timer = setTimeout(()=>{
+      parent.removeChild(chat)
+    }, this.config.telecastLife)
+    parent.insertBefore(chat, anchor)
+  },
+
+  getTelecastDom: function() {
+    var dom = document.createElement("div")
+    dom.classList.add("container")
+    var anchor = document.createElement("div")
+    anchor.id = "TELBOT_ANCHOR"
+    dom.appendChild(anchor)
+    if (this.config.telecastHideOverflow) dom.classList.add("telecastHideOverflow")
+    for (var c of this.chats) {
+      this.appendTelecastChat(dom, c)
+    }
+    return dom
+  },
+
   socketNotificationReceived: function (notification, payload) {
     switch (notification) {
-      case 'MESSAGE':
+      case 'CHAT':
+        this.telecast(payload)
+        break
+      case 'COMMAND':
         this.parseCommand(payload)
         break
       case 'SHELL_RESULT':

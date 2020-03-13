@@ -51,5 +51,7 @@
   "TELBOT_SCREENSHOT": "Take a screenshot of MagicMirror.",
   "TELBOT_SCREENSHOT_NULL": "You didn't set script name for this feature.",
   "TELBOT_SCREENSHOT_RESULT": "Captured : ",
-  "TELBOT_SCREENSHOT_RESULT_ERROR": "Screenshot is not captured.:"
+  "TELBOT_SCREENSHOT_RESULT_ERROR": "Screenshot is not captured.:",
+  "TELBOT_TELECAST": "Telecast a chat to MagicMirror screen",
+  "TELBOT_TELECAST_FALSE": "Telecast is not activated or allowed."
 }

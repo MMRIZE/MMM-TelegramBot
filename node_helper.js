@@ -5,6 +5,7 @@ const TelegramBot = require('node-telegram-bot-api')
 const fs = require('fs')
 const exec = require('child_process').exec
 const path = require('path')
+const https = require('https')
 
 const startTime = moment()
 
@@ -32,13 +33,10 @@ module.exports = NodeHelper.create({
 
   initialize: function(config) {
     this.config = config
-
     if (this.config.verbose) log = _log
-
     if (typeof config.adminChatId !== 'undefined') {
       this.adminChatId = config.adminChatId
     }
-
     if (typeof config.telegramAPIKey !== 'undefined') {
       try {
         var option = Object.assign({polling:true}, config.detailOption)
@@ -47,48 +45,141 @@ module.exports = NodeHelper.create({
       } catch (err) {
         log(err)
       }
-
       if (this.adminChatId && this.config.useWelcomeMessage) {
         this.say(this.welcomeMsg())
       }
-
       this.TB.on('message', (msg) =>{
-        var time = moment.unix(msg.date)
-        if (startTime.isBefore(time)) {
-          log(this.config.text["TELBOT_HELPER_MSG_COMING"]
-            + ":" + msg.chat.id
-            + " > " + msg.text
-          )
-          if (!this.allowed.has(msg.from.username)) {
-            this.say(this.notAllowedMsg(msg.message_id, msg.chat.id))
+        this.processMessage(msg)
+      })
+    } else {
+      log("Configuration fails.")
+    }
+  },
+
+  processMessage: function(msg) {
+    var time = moment.unix(msg.date)
+    if (startTime.isAfter(time)) return //do nothing
+    var commandLike = (msg.text) ? msg.text : ((msg.caption) ? msg.caption : "")
+    if (commandLike.indexOf("/") === 0) {
+      //commandLike
+      if (!this.allowed.has(msg.from.username)) {
+        const notAllowedMsg = (messageid, chatid) => {
+          var text = this.config.text["TELBOT_HELPER_NOT_ALLOWED"]
+          var msg = {
+            type: 'TEXT',
+            chat_id: chatid,
+            text: text,
+            option: {
+              reply_to_message_id: messageid,
+              disable_notification: false,
+              parse_mode: 'Markdown'
+            }
+          }
+          return msg
+        }
+        this.say(notAllowedMsg(msg.message_id, msg.chat.id))
+        return
+      } else {
+        msg.text = commandLike
+        this.sendSocketNotification('COMMAND', msg)
+      }
+    } else {
+      // Not commandlike
+      if (msg.reply_to_message) {
+        var reply = msg.reply_to_message.message_id
+        var foundSession = 0
+        this.askSession.forEach((s) => {
+          if(s.messageId == reply) {
+            foundSession = 1
+            msg.sessionId = s.sessionId
+            this.sendSocketNotification('ANSWER', msg)
+            this.askSession.delete(s)
             return
           }
-          if (msg.reply_to_message) {
-            var reply = msg.reply_to_message.message_id
-            var foundSession = 0
-            this.askSession.forEach((s) => {
-              if(s.messageId == reply) {
-                foundSession = 1
-                msg.sessionId = s.sessionId
-                this.sendSocketNotification('ANSWER', msg)
-                this.askSession.delete(s)
-                return
-              }
-              if (moment.unix(s.time).isBefore(moment().add(-1, 'hours'))) {
-                this.askSession.delete(s)
-              }
-            })
-            if (foundSession == 1) return
+          if (moment.unix(s.time).isBefore(moment().add(-1, 'hours'))) {
+            this.askSession.delete(s)
           }
+        })
+        if (foundSession == 1) return
+        if (msg.reply_to_message.from.is_bot) return // Don't transfer reply for Robot.
+      }
+      // Not answer for Bot
+      if (!this.config.telecast) return
+      if (String(this.config.telecast) !== String(msg.chat.id)) return
+      this.processTelecast(msg)
+    }
+  },
 
-          this.sendSocketNotification('MESSAGE', msg)
-          return
-        } else {
-          //too old. do nothing
+  processTelecast: function(msg) {
+    this.cookMsg(msg, (message)=>{
+      this.sendSocketNotification("CHAT", message)
+    })
+  },
+
+  cookMsg: async function (msg, callback=(retmsg)=>{}) {
+    var fromUserId = msg.from.id
+    const clearCache = (life)=>{
+      return new Promise ((resolve)=>{
+        try {
+          log("Clearing old cache data")
+          var cacheDir = path.resolve(__dirname, "cache")
+          var files = fs.readdirSync(cacheDir)
+          for (var f of files) {
+            var p = path.join(cacheDir, f)
+            var stat = fs.statSync(p)
+            var now = new Date().getTime()
+            var endTime = new Date(stat.ctime).getTime() + life
+            if (now > endTime) {
+              log("Unlink old cache file:", p)
+              fs.unlinkSync(p)
+            }
+          }
+          resolve(true)
+        } catch (e){
+          resolve(e)
         }
       })
-
     }
+    const downloadFile = (url, filepath)=>{
+      return new Promise((resolve)=>{
+        var f = fs.createWriteStream(filepath)
+        f.on('finish', () => {
+          f.close()
+          resolve(filepath)
+        })
+        const request = https.get(url, (response) => {
+          response.pipe(f)
+        })
+      })
+    }
+    const processProfilePhoto = async ()=>{
+      var upp = await this.TB.getUserProfilePhotos(fromUserId, {offset:0, limit:1})
+      if (!(upp && upp.total_count)) return null
+      var file = path.resolve(__dirname, "cache", String(fromUserId))
+      if (fs.existsSync(file)) return fromUserId
+      var photo = upp.photos[0][0]
+      var link = await this.TB.getFileLink(photo.file_id)
+      await downloadFile(link, file)
+      return fromUserId
+    }
+    const processChatPhoto = async (fileArray) => {
+      var bigger = fileArray.reduce((p, v)=>{
+        return (p.file_size > v.file_size ? p : v)
+      })
+      var fileId = bigger.file_id
+      var link = await this.TB.getFileLink(fileId)
+      var file = path.resolve(__dirname, "cache", String(bigger.file_unique_id))
+      await downloadFile(link, file)
+      return bigger.file_unique_id
+    }
+    var r = await clearCache(this.config.telecastLife)
+    if (r instanceof Error) log (r)
+    msg.from["_photo"] = String(await processProfilePhoto())
+    if (msg.hasOwnProperty("photo") && Array.isArray(msg.photo)) {
+      if (msg.caption) msg.text = msg.caption
+      msg.chat["_photo"] = String(await processChatPhoto(msg.photo))
+    }
+    callback(msg)
   },
 
   tooOldMsg: function(origMsg) {
@@ -116,21 +207,6 @@ module.exports = NodeHelper.create({
       chat_id: this.adminChatId,
       text: text,
       option: {
-        disable_notification: false,
-        parse_mode: 'Markdown'
-      }
-    }
-    return msg
-  },
-
-  notAllowedMsg: function(messageid, chatid) {
-    var text = this.config.text["TELBOT_HELPER_NOT_ALLOWED"]
-    var msg = {
-      type: 'TEXT',
-      chat_id: chatid,
-      text: text,
-      option: {
-        reply_to_message_id: messageid,
         disable_notification: false,
         parse_mode: 'Markdown'
       }
@@ -246,6 +322,9 @@ module.exports = NodeHelper.create({
       case 'SCREENSHOT':
         this.screenshot(payload.session)
         break
+      case 'FORCE_TELECAST':
+        this.processTelecast(payload)
+        break
     }
   },
 
@@ -281,7 +360,6 @@ module.exports = NodeHelper.create({
         text: this.config.text["TELBOT_HELPER_ERROR"]
       }
       this.say(msg)
-      //console.log(msg)
     }
   },
 
