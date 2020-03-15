@@ -14,6 +14,9 @@ TelegramBot module for MagicMirror
 **[1.2.0] 2020-03-13**
 - Added: `Telecast`. Now you can telecast your chat or message on MagicMirror screen. (Read the [wiki](https://github.com/eouia/MMM-TelegramBot/wiki/Telecast))
 - Changed: `position` is needed for `telecast` (You need to re-configure)
+![](https://raw.githubusercontent.com/eouia/MMM-TelegramBot/master/sc_fullsize.png)
+![](https://raw.githubusercontent.com/eouia/MMM-TelegramBot/master/sc_overflowed.png)
+
 
 ## Installation
 ### 1) Create Telegram Bot
