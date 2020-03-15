@@ -55,9 +55,13 @@
 
 
 #TELBOT .profile {
-  width: 100%;
+  width: var(--profile-width);
+  height: var(--profile-width);
   border-radius: 50%;
   margin: 0 auto;
+  line-height: 200%;
+  text-align: center;
+  font-weight: bold;
 }
 
 #TELBOT .profileImage {

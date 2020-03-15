@@ -7,6 +7,10 @@ TelegramBot module for MagicMirror
 - Other module developers can add their commands easily. (See the Wiki : https://github.com/eouia/MMM-TelegramBot/wiki )
 
 ## New Updates
+**[1.2.1] 2020-03-15**
+- added: text identifier on no profile photo.
+- added: `TELBOT_TELECAST` notification.
+
 **[1.2.0] 2020-03-13**
 - Added: `Telecast`. Now you can telecast your chat or message on MagicMirror screen. (Read the [wiki](https://github.com/eouia/MMM-TelegramBot/wiki/Telecast))
 - Changed: `position` is needed for `telecast` (You need to re-configure)

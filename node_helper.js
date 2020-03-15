@@ -174,7 +174,8 @@ module.exports = NodeHelper.create({
     }
     var r = await clearCache(this.config.telecastLife)
     if (r instanceof Error) log (r)
-    msg.from["_photo"] = String(await processProfilePhoto())
+    var profilePhoto = await processProfilePhoto()
+    if (profilePhoto) msg.from["_photo"] = String(profilePhoto)
     if (msg.hasOwnProperty("photo") && Array.isArray(msg.photo)) {
       if (msg.caption) msg.text = msg.caption
       msg.chat["_photo"] = String(await processChatPhoto(msg.photo))

@@ -648,6 +648,7 @@ Module.register("MMM-TelegramBot", {
       if (dom.firstChild.id !== "TELBOT_ANCHOR") dom.removeChild(dom.firstChild)
     }
     this.appendTelecastChat(dom, msgObj)
+    this.sendNotification("TELBOT_TELECAST", msgObj)
     var dom = document.querySelector("#TELBOT .container")
     var anchor = document.querySelector("#TELBOT_ANCHOR")
     anchor.scrollIntoView(false)
@@ -673,13 +674,23 @@ Module.register("MMM-TelegramBot", {
     from.classList.add("from")
     var profile = document.createElement("div")
     profile.classList.add("profile")
+    console.log(c.from)
     if (c.from._photo) {
-      var profileImage = document.createElement("img")
+      let profileImage = document.createElement("img")
       profileImage.classList.add("profileImage")
       profileImage.src = getImageURL(c.from._photo)
       profile.appendChild(profileImage)
     } else {
-      profile.innerHTML = c.from.first_name.substring(0, 1)
+      let altName = ""
+      if (c.from.first_name) altName += c.from.first_name.substring(0, 1)
+      if (c.from.last_name) altName += c.from.last_name.substring(0, 1)
+      if (!altName) altName += c.from.username.substring(0, 2)
+      let rr = c.from.id % 360
+      var hsl = `hsl(${rr}, 75%, 50%)`
+      console.log(hsl)
+      //profile.style.backgroundColor = "hsl(${rr}, 100%, 50%)"
+      profile.style.backgroundColor = hsl
+      profile.innerHTML = altName
     }
     from.appendChild(profile)
     chat.appendChild(from)
