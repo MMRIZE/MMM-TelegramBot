@@ -7,16 +7,8 @@ TelegramBot module for MagicMirror
 - Other module developers can add their commands easily. (See the Wiki : https://github.com/eouia/MMM-TelegramBot/wiki )
 
 ## New Updates
-**[1.2.1] 2020-03-15**
-- added: text identifier on no profile photo.
-- added: `TELBOT_TELECAST` notification.
-
-**[1.2.0] 2020-03-13**
-- Added: `Telecast`. Now you can telecast your chat or message on MagicMirror screen. (Read the [wiki](https://github.com/eouia/MMM-TelegramBot/wiki/Telecast))
-- Changed: `position` is needed for `telecast` (You need to re-configure)
-![](https://raw.githubusercontent.com/eouia/MMM-TelegramBot/master/sc_fullsize.png)
-![](https://raw.githubusercontent.com/eouia/MMM-TelegramBot/master/sc_overflowed.png)
-
+**[1.2.2] 2020-03-23**
+- added: Can upload screenshot to google photos via `MMM-GooglePhotos`(> 2.0.0)
 
 ## Installation
 ### 1) Create Telegram Bot
@@ -113,6 +105,16 @@ npm install
 > Telecast might have different look by position of module. on .bar, .middle.center, .third region, `telecastLimit:1` would be better. Or modify CSS by yourself.
 
 ## Update History
+**[1.2.1] 2020-03-15**
+- added: text identifier on no profile photo.
+- added: `TELBOT_TELECAST` notification.
+
+**[1.2.0] 2020-03-13**
+- Added: `Telecast`. Now you can telecast your chat or message on MagicMirror screen. (Read the [wiki](https://github.com/eouia/MMM-TelegramBot/wiki/Telecast))
+- Changed: `position` is needed for `telecast` (You need to re-configure)
+![](https://raw.githubusercontent.com/eouia/MMM-TelegramBot/master/sc_fullsize.png)
+![](https://raw.githubusercontent.com/eouia/MMM-TelegramBot/master/sc_overflowed.png)
+
 **[1.1.1] 2020-03-09**
 - changed: `TELBOT_TELL_ADMIN` can get rich format.
 
