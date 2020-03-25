@@ -28,6 +28,7 @@ module.exports = NodeHelper.create({
     this.adminChatId = ''
     this.askSession = new Set()
     this.allowed = new Set()
+    this.allowedTC = new Set()
     this.TB = null
   },
 
@@ -60,7 +61,36 @@ module.exports = NodeHelper.create({
     var time = moment.unix(msg.date)
     if (startTime.isAfter(time)) return //do nothing
     var commandLike = (msg.text) ? msg.text : ((msg.caption) ? msg.caption : "")
-    if (commandLike.indexOf("/") === 0) {
+    
+    //telecast
+    if (commandLike.indexOf("/telecast") === 0) {
+      if (!this.allowedTC.has(msg.from.username) && !this.allowed.has(msg.from.username)) {
+        const notAllowedMsg = (messageid, chatid) => {
+          var text = this.config.text["TELBOT_HELPER_NOT_ALLOWED"]
+          var msg = {
+            type: 'TEXT',
+            chat_id: chatid,
+            text: text,
+            option: {
+              reply_to_message_id: messageid,
+              disable_notification: false,
+              parse_mode: 'Markdown'
+            }
+          }
+          return msg
+        }
+        this.say(notAllowedMsg(msg.message_id, msg.chat.id))
+        return
+      } else {
+        msg.text = commandLike
+      }
+      this.sendSocketNotification('COMMAND', msg)
+        // Not answer for Bot
+        if (!this.config.telecast) return
+        if (String(this.config.telecast) !== String(msg.chat.id)) return
+        this.processTelecast(msg)
+      return
+    } else if (commandLike.indexOf("/") === 0) {
       //commandLike
       if (!this.allowed.has(msg.from.username)) {
         const notAllowedMsg = (messageid, chatid) => {
@@ -103,10 +133,6 @@ module.exports = NodeHelper.create({
         if (foundSession == 1) return
         if (msg.reply_to_message.from.is_bot) return // Don't transfer reply for Robot.
       }
-      // Not answer for Bot
-      if (!this.config.telecast) return
-      if (String(this.config.telecast) !== String(msg.chat.id)) return
-      this.processTelecast(msg)
     }
   },
 
@@ -307,6 +333,9 @@ module.exports = NodeHelper.create({
         break;
       case 'ALLOWEDUSER':
         this.allowed = new Set(payload)
+        break;
+      case 'ALLOWEDUSERTC':
+        this.allowedTC = new Set(payload)
         break;
       case 'REBOOT':
         this.shell('sudo reboot')

@@ -36,6 +36,7 @@ Module.register("MMM-TelegramBot", {
     favourites:["/commands", "/modules", "/hideall", "/showall"],
     customCommands:[],
     telecast: null, // true or chat_id
+    allowedTelecastUser: [],
     telecastLife: 1000 * 60 * 60 * 6,
     telecastLimit: 5,
     telecastHideOverflow: true,
@@ -61,6 +62,7 @@ Module.register("MMM-TelegramBot", {
       new TelegramBotCommandRegister(this, this.registerCommand.bind(this))
     )
     this.allowed = new Set(this.config.allowedUser)
+    this.allowedTC = new Set(this.config.allowedTelecastUser)
     this.history = []
     this.chats = []
   },
@@ -793,6 +795,7 @@ Module.register("MMM-TelegramBot", {
         }
         this.isAlreadyInitialized = 1
         this.sendSocketNotification('ALLOWEDUSER', [...this.allowed])
+        this.sendSocketNotification('ALLOWEDUSERTC', [...this.allowedTC])
         var commands = []
         MM.getModules().enumerate((m) => {
           if (m.name !== 'MMM-TelegramBot') {
