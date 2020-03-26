@@ -20,6 +20,10 @@
 Module.register("MMM-TelegramBot", {
   defaults: {
     allowedUser: [],
+    commandAllowed: { // If set, only specific user can use these commands, other even in allowedUser cannot. These members should be allowed by allowedUser first.
+      //"telecast": ["eouia", "someone"],
+      //"mychatid": ["eouia"]
+    },
     alertTimer: "30000",
     useWelcomeMessage: true,
     verbose:true,
@@ -500,6 +504,14 @@ Module.register("MMM-TelegramBot", {
   },
 
   parseCommand: function(msg) {
+    const createHandler = (msg, args) => {
+      var callbacks = {
+        reply: this.reply.bind(this),
+        ask: this.ask.bind(this),
+        say: this.say.bind(this)
+      }
+      return new TelegramBotMessageHandler(msg, args, callbacks)
+    }
     var args = null
     var response = null
     var chatId = msg.chat.id
@@ -526,6 +538,17 @@ Module.register("MMM-TelegramBot", {
     if (matchedCommands.length == 1) {
       //proper
       var c = matchedCommands[0]
+      if (this.config.commandAllowed.hasOwnProperty(c.command)) {
+        var allowedUser = this.config.commandAllowed[c.command]
+        if (Array.isArray(allowedUser) && allowedUser.length > 0) {
+          if (!allowedUser.includes(msg.from.username)) {
+            var handler = createHandler(msg, null)
+            var text = this.translate("TELBOT_NOT_ALLOWED_COMMAND")
+            handler.reply("TEXT", text, {parse_mode:"Markdown"})
+            return
+          }
+        }
+      }
       var restText = matched[2].trim()
       if (restText == '') {
         args = null
@@ -574,12 +597,7 @@ Module.register("MMM-TelegramBot", {
         msg.admin = 'admin'
       }
       if (c.callback !== 'notificationReceived') {
-        var callbacks = {
-          reply: this.reply.bind(this),
-          ask: this.ask.bind(this),
-          say: this.say.bind(this)
-        }
-        var handler = new TelegramBotMessageHandler(msg, args, callbacks)
+        var handler = createHandler(msg, args)
         if (typeof c.callback == "function") {
           c.callback(c.execute, handler, c.module)
         } else {
@@ -596,12 +614,7 @@ Module.register("MMM-TelegramBot", {
       }
     } else {
       //0 or multi
-      var callbacks = {
-        reply: this.reply.bind(this),
-        ask: this.ask.bind(this),
-        say: this.say.bind(this)
-      }
-      var handler = new TelegramBotMessageHandler(msg, null, callbacks)
+      var handler = createHandler(msg, null)
       var text = this.translate("TELBOT_NOT_REGISTERED_COMMAND")
       if (matchedCommands.length > 1) {
         text = this.translate("TELBOT_FOUND_SEVERAL_COMMANDS")
@@ -675,7 +688,6 @@ Module.register("MMM-TelegramBot", {
     from.classList.add("from")
     var profile = document.createElement("div")
     profile.classList.add("profile")
-    console.log(c.from)
     if (c.from._photo) {
       let profileImage = document.createElement("img")
       profileImage.classList.add("profileImage")
@@ -688,7 +700,6 @@ Module.register("MMM-TelegramBot", {
       if (!altName) altName += c.from.username.substring(0, 2)
       let rr = c.from.id % 360
       var hsl = `hsl(${rr}, 75%, 50%)`
-      console.log(hsl)
       //profile.style.backgroundColor = "hsl(${rr}, 100%, 50%)"
       profile.style.backgroundColor = hsl
       profile.innerHTML = altName

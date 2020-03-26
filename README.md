@@ -7,8 +7,11 @@ TelegramBot module for MagicMirror
 - Other module developers can add their commands easily. (See the Wiki : https://github.com/eouia/MMM-TelegramBot/wiki )
 
 ## New Updates
-**[1.2.2] 2020-03-23**
-- added: Can upload screenshot to google photos via `MMM-GooglePhotos`(> 2.0.0)
+**[1.2.3] 2020-03-26**
+- added: `commandAllowed` option is added. Now some command would be executable by only specific users. Others, even in `allowedUser` cannot use it.
+
+
+
 
 ## Installation
 ### 1) Create Telegram Bot
@@ -84,9 +87,12 @@ npm install
 
     /** added since 1.2.0 **/
     telecast: null, // true or chat_id
-    telecastLife: 1000 * 60 * 60 * 6, //
+    telecastLife: 1000 * 60 * 60 * 6,
     telecastLimit: 5,
-    telecastHideOverflow: true,
+    telecastHideOverflow: true
+
+    /** added since 1.2.3 **/
+    commandAllowed: {}
   }
 },
 ```
@@ -104,7 +110,29 @@ npm install
 - **`telecastHideOverflow`** : on `true`, when overflowed old chats will be hidden. (defined by CSS) If you have touch/mouse interface, you can scroll hidden area.
 > Telecast might have different look by position of module. on .bar, .middle.center, .third region, `telecastLimit:1` would be better. Or modify CSS by yourself.
 
+- **`commandAllowed`** : command would be executable by only specific users. Others, even in `allowedUser` cannot use it.
+```js
+allowedUser: ["me", "john", "jane"],
+commandAllowed: {
+  "telecast": ["me", "john"],
+  "mychatid": ["me"],
+  "modules": [],
+}
+```
+In this example;
+   - `me` and `john` can execute **`/telecast`** command, but `jane` cannot.
+   - only `me` can execute **`/mychatid`** command. The others can't.
+   - `jane` can execute all other commands except **`/telecast`** and **`/mychatid`**.
+   - `"modules":[],` will be ignored. It does not mean "Nobody can use this command.
+
+
+
+
+
 ## Update History
+**[1.2.2] 2020-03-23**
+- added: Can upload screenshot to google photos via `MMM-GooglePhotos`(> 2.0.0)
+
 **[1.2.1] 2020-03-15**
 - added: text identifier on no profile photo.
 - added: `TELBOT_TELECAST` notification.

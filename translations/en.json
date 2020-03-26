@@ -6,6 +6,7 @@
   "TELBOT_HELPER_MSG_COMING" : "Message is coming from CHAT",
   "TELBOT_HELPER_TOOOLDMSG" : "\nYour message was too old.\n",
   "TELBOT_NOT_REGISTERED_COMMAND" : "Sorry, that command is not registered.",
+  "TELBOT_NOT_ALLOWED_COMMAND": "You are not allowed to use this command. Ask admin.",
   "TELBOT_HELP" : "Show description of commands.\ne.g) `/help commands`.",
   "TELBOT_HELP_SERVED" : "_Served by {module}_",
   "TELBOT_HELP_HELP" : "To show description of command, try `/help [command_name]`",

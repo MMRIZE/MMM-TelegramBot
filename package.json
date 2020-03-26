@@ -1,6 +1,6 @@
 {
   "name": "MMM-TelegramBot",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "dependencies": {
     "moment": "^2.18.1",
     "node-telegram-bot-api": "^0.28.0"
