@@ -4,14 +4,15 @@ TelegramBot module for MagicMirror
 ## Feature
 - You can remote-control your `MagicMirror` and modules within `Telegram`.
 - The Bot is implemented in this module thus you don't need to manage antoher daemon.
-- Other module developers can add their commands easily. (See the Wiki : https://github.com/eouia/MMM-TelegramBot/wiki )
+- Other module developers can add their commands easily. (See the Wiki : https://github.com/bugsounet/MMM-TelegramBot/wiki )
 
 ## New Updates
+**[1.3.0] 2020-05-12**
+- Owner change
+- Add installer
+
 **[1.2.3] 2020-03-26**
 - added: `commandAllowed` option is added. Now some command would be executable by only specific users. Others, even in `allowedUser` cannot use it.
-
-
-
 
 ## Installation
 ### 1) Create Telegram Bot
@@ -26,7 +27,7 @@ TelegramBot module for MagicMirror
 1. In your mirror, open terminal and execute below;
 ```js
 cd ~/MagicMirror/modules
-git clone https://github.com/eouia/MMM-TelegramBot.git
+git clone https://github.com/bugsounet/MMM-TelegramBot.git
 cd MMM-TelegramBot
 npm install
 ```
@@ -138,10 +139,10 @@ In this example;
 - added: `TELBOT_TELECAST` notification.
 
 **[1.2.0] 2020-03-13**
-- Added: `Telecast`. Now you can telecast your chat or message on MagicMirror screen. (Read the [wiki](https://github.com/eouia/MMM-TelegramBot/wiki/Telecast))
+- Added: `Telecast`. Now you can telecast your chat or message on MagicMirror screen. (Read the [wiki](https://github.com/bugsounet/MMM-TelegramBot/wiki/Telecast))
 - Changed: `position` is needed for `telecast` (You need to re-configure)
-![](https://raw.githubusercontent.com/eouia/MMM-TelegramBot/master/sc_fullsize.png)
-![](https://raw.githubusercontent.com/eouia/MMM-TelegramBot/master/sc_overflowed.png)
+![](https://raw.githubusercontent.com/bugsounet/MMM-TelegramBot/master/sc_fullsize.png)
+![](https://raw.githubusercontent.com/bugsounet/MMM-TelegramBot/master/sc_overflowed.png)
 
 **[1.1.1] 2020-03-09**
 - changed: `TELBOT_TELL_ADMIN` can get rich format.
@@ -171,4 +172,4 @@ In this example;
 - Added: `useWelcomeMessage` and `verbose`
 
 ## More Information
-See the [Wiki](https://github.com/eouia/MMM-TelegramBot/wiki)
+See the [Wiki](https://github.com/bugsounet/MMM-TelegramBot/wiki)
