@@ -25,7 +25,7 @@ module.exports = NodeHelper.create({
     this.config = {}
     this.commands = []
     this.callsigns = []
-    this.adminChatId = ''
+    this.adminChatId = ""
     this.askSession = new Set()
     this.allowed = new Set()
     this.TB = null
@@ -35,7 +35,7 @@ module.exports = NodeHelper.create({
     this.config = config
     if (this.config.verbose) log = _log
     if (typeof config.adminChatId !== 'undefined') {
-      this.adminChatId = config.adminChatId
+      this.adminChatId = this.config.adminChatId
     }
     if (typeof config.telegramAPIKey !== 'undefined') {
       try {

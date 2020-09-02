@@ -7,7 +7,7 @@
   "TELBOT_HELPER_TOOOLDMSG" : "\nDeine Nachricht war zu alt.\n",
   "TELBOT_NOT_REGISTERED_COMMAND" : "Sorry, dieser Befehl ist nicht registriert.",
   "TELBOT_HELP" : "Zeige Beschreibung der Kommandos.\nz.B. `/help commands`.",
-  "TELBOT_HELP_SERVED" : "Bereitgestellt von {module}_",
+  "TELBOT_HELP_SERVED" : "_Bereitgestellt von {module}_",
   "TELBOT_HELP_HELP" : "Was kann ich für dich tun? versuche `/help help`",
   "TELBOT_COMMANDS" : "Liste verfügbarer Kommandos.",
   "TELBOT_COMMANDS_ERROR" : "Ich kann kein Komando finden... Merkwürdig.",

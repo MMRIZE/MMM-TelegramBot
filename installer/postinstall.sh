@@ -25,4 +25,4 @@ source utils.sh
 # module name
 Installer_module="TelegramBot"
 
-Installer_exit "$Installer_module is now installed !"
+Installer_info "$Installer_module is now installed !"

@@ -7,6 +7,11 @@ TelegramBot module for MagicMirror
 - Other module developers can add their commands easily. (See the Wiki : https://github.com/bugsounet/MMM-TelegramBot/wiki )
 
 ## New Updates
+
+**[1.3.1] 2020-09-03**
+ - prepare for UpdateNotification module
+ - repare de.json file
+
 **[1.3.0] 2020-05-12**
 - Owner change
 - Add installer
