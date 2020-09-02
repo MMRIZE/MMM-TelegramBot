@@ -826,7 +826,7 @@ Module.register("MMM-TelegramBot", {
         break
       case 'TELBOT_TELL_ADMIN':
         if (typeof payload == 'string') {
-          payload += "\nFrom *" + sender.name + "*"
+          payload += "\n" + this.translate("TELBOT_HELP_SERVED" , {module: sender.name})
           var r = {
             chat_id : null,
             type : 'TEXT',
