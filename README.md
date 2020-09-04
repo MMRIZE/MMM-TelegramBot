@@ -8,7 +8,7 @@ TelegramBot module for MagicMirror
 
 ## New Updates
 
-**[1.3.2] 2020-09-xx**
+**[1.3.2] 2020-09-04**
  - Add prepare Italian translation
  - Delete infinite loop onError
  - Add TelegramBotExtraChars() function
