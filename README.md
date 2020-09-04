@@ -8,6 +8,29 @@ TelegramBot module for MagicMirror
 
 ## New Updates
 
+**[1.3.2] 2020-09-xx**
+ - Add prepare Italian translation
+ - Delete infinite loop onError
+ - Add TelegramBotExtraChars() function
+   * This function correct you sended text, because some character can a mismake with markdown and return an `can't parse entities` error
+   * You can use it in all module
+   * Sample :
+
+```
+/** verify if new command of TelegramBot exist **/
+/** replace specials chars for return no parse entities error **/
+/** actually need for example with `_` caracter in PARTITION name **/
+
+var text = "PARTITION /media/bugs/UEFI_NTFS: The storage is used at 94.74 percent"
+try {
+  text = TelegramBotExtraChars(text)
+} catch (e) {
+  // do nothing
+}
+/** send to Telegram **/
+this.sendNotification("TELBOT_TELL_ADMIN", text)
+```
+
 **[1.3.1] 2020-09-03**
  - prepare for UpdateNotification module
  - repare de.json file

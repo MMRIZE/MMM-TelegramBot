@@ -8,6 +8,16 @@ TelegramBotCommandRegister.prototype.add = function (commandObj) {
 }
 
 
+/** remove ExtraChars for telegramBot markdown **/
+function TelegramBotExtraChars (str) {
+  /** special markdown for Telegram **/
+  str = str.replace(new RegExp("_", "g"), "\\_") //
+  str = str.replace(new RegExp("\\*", "g"), "\\*")
+  str = str.replace(new RegExp("\\[", "g"), "\\[")
+  str = str.replace(new RegExp("`", "g"), "\\`")
+  return str
+}
+
 function TelegramBotMessageHandler (message, args, callbacks) {
   this.args = args
   this.message = message

@@ -75,6 +75,7 @@ Module.register("MMM-TelegramBot", {
       de: "translations/de.json",
       id: "translations/id.json",
       fr: "translations/fr.json",
+      it: "translations/it.json"
     }
   },
 

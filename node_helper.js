@@ -355,12 +355,17 @@ module.exports = NodeHelper.create({
         }
       }
       this.say(msg, true)
+
+      /** disabled -> infinite loop **/
+      /** only sended to admin **/
+      /*
       msg = {
         type: 'TEXT',
         chat_id: response.chat_id,
         text: this.config.text["TELBOT_HELPER_ERROR"]
       }
       this.say(msg)
+      */
     }
   },
 
