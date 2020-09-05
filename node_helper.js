@@ -172,6 +172,23 @@ module.exports = NodeHelper.create({
       await downloadFile(link, file)
       return bigger.file_unique_id
     }
+
+    const processChatSticker = async (sticker) => {
+      var fileId = sticker.thumb.file_id
+      var link = await this.TB.getFileLink(fileId)
+      var file = path.resolve(__dirname, "cache", String(sticker.thumb.file_unique_id))
+      await downloadFile(link, file)
+      return sticker.thumb.file_unique_id
+    }
+
+    const processChatAnimated = async (animation) => {
+      var fileId = animation.file_id
+      var link = await this.TB.getFileLink(fileId)
+      var file = path.resolve(__dirname, "cache", String(animation.file_unique_id))
+      await downloadFile(link, file)
+      return animation.file_unique_id
+    }
+
     var r = await clearCache(this.config.telecastLife)
     if (r instanceof Error) log (r)
     var profilePhoto = await processProfilePhoto()
@@ -180,6 +197,13 @@ module.exports = NodeHelper.create({
       if (msg.caption) msg.text = msg.caption
       msg.chat["_photo"] = String(await processChatPhoto(msg.photo))
     }
+    if (msg.hasOwnProperty("sticker")) { // pass sticker as photo
+      msg.chat["_photo"] = String(await processChatSticker(msg.sticker))
+    }
+    if (msg.hasOwnProperty("animation")) { // pass animation as video
+      msg.chat["_video"] = String(await processChatAnimated(msg.animation))
+    }
+
     callback(msg)
   },
 

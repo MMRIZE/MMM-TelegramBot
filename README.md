@@ -8,6 +8,11 @@ TelegramBot module for MagicMirror
 
 ## New Updates
 
+**[1.3.3] 2020-09-05**
+ - Add stickers support (not animated)
+ - Add gifs support
+ - Add native default sound on message received
+
 **[1.3.2] 2020-09-04**
  - Add prepare Italian translation
  - Delete infinite loop onError
@@ -25,7 +30,7 @@ var text = "PARTITION /media/bugs/UEFI_NTFS: The storage is used at 94.74 percen
 try {
   text = TelegramBotExtraChars(text)
 } catch (e) {
-  // do nothing
+  // do nothing but it will parse an error !
 }
 /** send to Telegram **/
 this.sendNotification("TELBOT_TELL_ADMIN", text)
@@ -65,6 +70,7 @@ npm install
 ```js
 {
   module: 'MMM-TelegramBot',
+  position: 'top_center',
   config: {
     telegramAPIKey : '<your Telegram API Token>',
     allowedUser : ['<your Telegram username without @>'], // This is NOT the username of bot.
@@ -83,6 +89,7 @@ npm install
 ```js
 {
   module: 'MMM-TelegramBot',
+  position: 'top_center',
   config: {
     telegramAPIKey : '<your Telegram API Token>',
     allowedUser : ['<your Telegram username without @>'],
@@ -118,10 +125,13 @@ npm install
     telecast: null, // true or chat_id
     telecastLife: 1000 * 60 * 60 * 6,
     telecastLimit: 5,
-    telecastHideOverflow: true
+    telecastHideOverflow: true,
 
     /** added since 1.2.3 **/
-    commandAllowed: {}
+    commandAllowed: {},
+
+    /** add since 1.3.3 **/
+    useSoundNotification: true
   }
 },
 ```
@@ -140,6 +150,7 @@ npm install
 > Telecast might have different look by position of module. on .bar, .middle.center, .third region, `telecastLimit:1` would be better. Or modify CSS by yourself.
 
 - **`commandAllowed`** : command would be executable by only specific users. Others, even in `allowedUser` cannot use it.
+- **`useSoundNotification`** : Use Official notification sound, on incomming messages
 ```js
 allowedUser: ["me", "john", "jane"],
 commandAllowed: {
