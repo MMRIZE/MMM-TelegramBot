@@ -26,6 +26,7 @@ Module.register("MMM-TelegramBot", {
     },
     alertTimer: "30000",
     useWelcomeMessage: true,
+    useSoundNotification: true,
     verbose:true,
     screenshotScript: "scrot",
     detailOption: {},
@@ -67,6 +68,11 @@ Module.register("MMM-TelegramBot", {
     this.allowed = new Set(this.config.allowedUser)
     this.history = []
     this.chats = []
+    /** audio part **/
+    if (this.config.useSoundNotification) {
+      this.sound = new Audio()
+      this.sound.autoplay = true
+    }
   },
 
   getTranslations: function() {
@@ -652,7 +658,8 @@ Module.register("MMM-TelegramBot", {
   },
 
   telecast: function(msgObj) {
-    if (!msgObj.text && !msgObj.photo) return
+    if (!msgObj.text && !msgObj.photo && !msgObj.sticker && !msgObj.animation) return
+    if (this.config.useSoundNotification) this.sound.src = "modules/MMM-TelegramBot/msg_incoming.mp3"
     while (this.chats.length >= this.config.telecastLimit) {
       this.chats.shift()
     }
@@ -717,6 +724,7 @@ Module.register("MMM-TelegramBot", {
       photo.classList.add("photo")
       var background = document.createElement("div")
       background.classList.add("background")
+      console.log(getImageURL(c.chat._photo))
       background.style.backgroundImage = `url(${getImageURL(c.chat._photo)})`
       photo.appendChild(background)
       var imageContainer = document.createElement("div")
@@ -731,12 +739,26 @@ Module.register("MMM-TelegramBot", {
       photo.appendChild(imageContainer)
       bubble.appendChild(photo)
     }
+    if (c.chat._video) {
+      var video = document.createElement("video")
+      video.classList.add("video")
+      video.autoplay = true
+      video.loop = true
+      video.src = getImageURL(c.chat._video)
+      video.addEventListener('loadeddata', () => {
+          console.log("Loaded the video's data!");
+          anchor.scrollIntoView(false)
+      }, false)
+      bubble.appendChild(video)
+    }
+
     if (c.text) {
       var text = document.createElement("div")
       text.classList.add("text")
       text.innerHTML = c.text
       bubble.appendChild(text)
     }
+
     message.appendChild(bubble)
     chat.appendChild(message)
     chat.timer = setTimeout(()=>{
