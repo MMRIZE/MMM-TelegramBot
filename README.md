@@ -163,7 +163,6 @@ In this example;
    - only `me` can execute **`/mychatid`** command. The others can't.
    - `jane` can execute all other commands except **`/telecast`** and **`/mychatid`**.
    - `"modules":[],` will be ignored. It does not mean "Nobody can use this command.
-- **`useSoundNotification`** : Use Official notification sound, on incomming messages
 ```js
 allowedUser: ["me", "john", "jane"],
 commandAllowed: {
@@ -172,6 +171,9 @@ commandAllowed: {
   "modules": [],
 }
 ```
+
+- **`useSoundNotification`** : Use Official notification sound, on incomming messages
+
 - **`dateFormat`** : Your prefered date format
 
 
