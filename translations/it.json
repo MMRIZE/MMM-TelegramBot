@@ -2,7 +2,7 @@
   "TELBOT_HELPER_ERROR" : "C'è un'errore. Chiedi al mio padrone.",
   "TELBOT_HELPER_NOT_ALLOWED" : "Non sei autorizzato a mandarmi comandi. Chiedi al mio padrone.",
   "TELBOT_HELPER_RESTART" : "`MagicMirror` è partito il :",
-  "TELBOT_HELPER_WAKEUP" : "Finalmente mi sono risvegliato da un lungo sonno!",
+  "TELBOT_HELPER_WAKEUP" : "Mi hai riavviato, ai tuoi ordini",
   "TELBOT_HELPER_MSG_COMING" : "Sta arrivando un messaggio dalla CHAT",
   "TELBOT_HELPER_TOOOLDMSG" : "\nIl tuo messaggio è troppo vecchio.\n",
   "TELBOT_NOT_REGISTERED_COMMAND" : "Scusa, questo comando non esiste.",
@@ -54,5 +54,7 @@
   "TELBOT_SCREENSHOT_RESULT": "Screenshot del MagicMirror : ",
   "TELBOT_SCREENSHOT_RESULT_ERROR": "Lo Screenshot non è riuscito.:",
   "TELBOT_TELECAST": "Trasmetti una chat sul tuo MagicMirror",
-  "TELBOT_TELECAST_FALSE": "Trasmissione non attiva o disabilitata."
+  "TELBOT_TELECAST_FALSE": "Trasmissione non attiva o disabilitata.",
+  "TELBOT_CLEAN": "Pulire lo schermo della telecast",
+  "TELBOT_CLEAN_DONE" : "Pulisco telecast finestra"
 }

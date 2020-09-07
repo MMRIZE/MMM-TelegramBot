@@ -40,7 +40,7 @@
   "TELBOT_FOUND_SEVERAL_COMMANDS": "Several commands are searched. Your intention might be one of these:\n",
   "TELBOT_RECENT": "Load recent used commands as keyboard",
   "TELBOT_RECENT_RESULT": "Select command from Keyboard",
-  "TELBOT_RESET_KEYBOARD": "Reset Kyeboard",
+  "TELBOT_RESET_KEYBOARD": "Reset Keyboard",
   "TELBOT_RESET_KEYBOARD_RESULT": "Keyboard is reset",
   "TELBOT_SHELL": "Execute shell script/command directly.(Use carefully)",
   "TELBOT_SHELL_RESULT": "Executed:\n",
@@ -54,5 +54,7 @@
   "TELBOT_SCREENSHOT_RESULT": "Captured : ",
   "TELBOT_SCREENSHOT_RESULT_ERROR": "Screenshot is not captured.:",
   "TELBOT_TELECAST": "Telecast a chat to MagicMirror screen",
-  "TELBOT_TELECAST_FALSE": "Telecast is not activated or allowed."
+  "TELBOT_TELECAST_FALSE": "Telecast is not activated or allowed.",
+  "TELBOT_CLEAN": "Clean telecast screen",
+  "TELBOT_CLEAN_DONE" : "Telecast screen is cleaned"
 }
