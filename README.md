@@ -8,6 +8,11 @@ TelegramBot module for MagicMirror
 
 ## New Updates
 
+**[1.3.4] 2020-09-07**
+ - add `/clean` command for clean telecast screen
+ - update `fr` translations
+ - add `dateFormat` feature
+
 **[1.3.3] 2020-09-05**
  - Add stickers support (not animated)
  - Add gifs support
@@ -131,7 +136,10 @@ npm install
     commandAllowed: {},
 
     /** add since 1.3.3 **/
-    useSoundNotification: true
+    useSoundNotification: true,
+
+    /** add since 1.3.4 **/
+    dateFormat: "DD-MM-YYYY HH:mm:ss"
   }
 },
 ```
@@ -150,6 +158,11 @@ npm install
 > Telecast might have different look by position of module. on .bar, .middle.center, .third region, `telecastLimit:1` would be better. Or modify CSS by yourself.
 
 - **`commandAllowed`** : command would be executable by only specific users. Others, even in `allowedUser` cannot use it.
+In this example;
+   - `me` and `john` can execute **`/telecast`** command, but `jane` cannot.
+   - only `me` can execute **`/mychatid`** command. The others can't.
+   - `jane` can execute all other commands except **`/telecast`** and **`/mychatid`**.
+   - `"modules":[],` will be ignored. It does not mean "Nobody can use this command.
 - **`useSoundNotification`** : Use Official notification sound, on incomming messages
 ```js
 allowedUser: ["me", "john", "jane"],
@@ -159,14 +172,7 @@ commandAllowed: {
   "modules": [],
 }
 ```
-In this example;
-   - `me` and `john` can execute **`/telecast`** command, but `jane` cannot.
-   - only `me` can execute **`/mychatid`** command. The others can't.
-   - `jane` can execute all other commands except **`/telecast`** and **`/mychatid`**.
-   - `"modules":[],` will be ignored. It does not mean "Nobody can use this command.
-
-
-
+- **`dateFormat`** : Your prefered date format
 
 
 ## Update History

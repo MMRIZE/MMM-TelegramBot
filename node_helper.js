@@ -210,7 +210,7 @@ module.exports = NodeHelper.create({
   tooOldMsg: function(origMsg) {
     var text = origMsg.text
       + this.config.text["TELBOT_HELPER_TOOOLDMSG"]
-      + moment.unix(origMsg.date).format('YYYY-MM-DD HH:mm:ss')
+      + moment.unix(origMsg.date).format(this.config.dateFormat)
     var msg = {
       type: 'TEXT',
       chat_id: origMsg.chat.id,
@@ -226,7 +226,7 @@ module.exports = NodeHelper.create({
   welcomeMsg: function() {
     var text = "*" + this.config.text["TELBOT_HELPER_WAKEUP"] + "*\n"
       + this.config.text["TELBOT_HELPER_RESTART"]
-      + "\n`" + startTime.format("YYYY-MM-DD HH:mm:ss") + "`\n"
+      + "\n`" + startTime.format(this.config.dateFormat) + "`\n"
     var msg = {
       type: 'TEXT',
       chat_id: this.adminChatId,
@@ -419,7 +419,7 @@ module.exports = NodeHelper.create({
     var t = new moment()
     var retObj = {
       session: sessionId,
-      timestamp: t.format("YYYY/MM/DD HH:mm:ss"),
+      timestamp: t.format(this.config.dateFormat),
       path: path.resolve("screenshot.png"),
       result: "",
       status: false

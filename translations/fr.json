@@ -6,6 +6,7 @@
   "TELBOT_HELPER_MSG_COMING" : "Le message vient du chat",
   "TELBOT_HELPER_TOOOLDMSG" : "\nVotre message est trop ancien\n",
   "TELBOT_NOT_REGISTERED_COMMAND" : "Désolé, cette commande n'est pas enregistrée.",
+  "TELBOT_NOT_ALLOWED_COMMAND": "Vous n'êtes pas autorisé à utiliser cette commande. Demandez à un administrateur.",
   "TELBOT_HELP" : "Affiche la description des commandes.\nExemple: `/help commands`.",
   "TELBOT_HELP_SERVED" : "_Servi par {module}_",
   "TELBOT_HELP_HELP" : "Montre la description de la commande, Essayez `/help [nom_de_la_commande]`",
@@ -33,5 +34,30 @@
   "TELBOT_HIDDEN" : "Invisible",
   "TELBOT_SHOWING" : "Visible",
   "TELBOT_END" : "fin",
-  "TELBOT_DISMISSALERT" : "Supprimer l'alerte du miroir"
+  "TELBOT_DISMISSALERT" : "Supprimer l'alerte du miroir",
+  "TELBOT_FAVOR" : "Charge vos commandes favorites pour les keyboard",
+  "TELBOT_FAVOR_RESULT" : "Selectionnez une commande depuis le Keyboard",
+  "TELBOT_FOUND_SEVERAL_COMMANDS": "Plusieurs commandes ont été trouvé. Votre intention pourrait être l'une de celles-ci:\n",
+  "TELBOT_RECENT": "Charge les dernieres commandes utilisées pour le keyboard",
+  "TELBOT_RECENT_RESULT": "Selectionnez une commande depuis le Keyboard",
+  "TELBOT_RESET_KEYBOARD": "Reinitialise le fonction Keyboard",
+  "TELBOT_RESET_KEYBOARD_RESULT": "Keyboard est réinitialisé",
+  "TELBOT_SHELL": "Execute un script ou une commande shell. (Utilisez avec précaution!)",
+  "TELBOT_SHELL_RESULT": "Executé:\n",
+  "TELBOT_SHELL_RESULT_SESSION_ERROR": "Execution impossible. Désolé.",
+  "TELBOT_NOTIFICATION": "Envoye une notification personalisée\nexemple: ``` /notification SHOW_ALERT {\"title\":\"hello\", \"timer\":1000}```",
+  "TELBOT_NOTIFICATION_RESULT": "Notification envoyée.",
+  "TELBOT_NOTIFICATION_FAIL": "Arguments invalide.",
+  "TELBOT_NOTIFICATION_PAYLOAD_FAIL": "Les parametres de Notification ne sont pas correct.",
+  "TELBOT_SCREENSHOT": "Prend une capture d'écran de MagicMirror.",
+  "TELBOT_SCREENSHOT_NULL": "Vous n'avez pas defini le nom du programme pour cette fonction.",
+  "TELBOT_SCREENSHOT_RESULT": "Capture : ",
+  "TELBOT_SCREENSHOT_RESULT_ERROR": "Le screenshot n'as pas été capturé:",
+  "TELBOT_TELECAST": "Telecast la fenetre de message vers l'écran de MagicMirror",
+  "TELBOT_TELECAST_FALSE": "Telecast n'est pas activé or autorisé.",
+  "TELBOT_CLEAN": "Efface l'écran telecast",
+  "TELBOT_CLEAN_DONE" : "Les messages de Telecast ont été supprimé"
 }
+
+
+

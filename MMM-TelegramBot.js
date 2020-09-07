@@ -27,7 +27,7 @@ Module.register("MMM-TelegramBot", {
     alertTimer: "30000",
     useWelcomeMessage: true,
     useSoundNotification: true,
-    verbose:true,
+    verbose:false,
     screenshotScript: "scrot",
     detailOption: {},
     //if you want this module to work behind local proxy, try this. (experimental)
@@ -44,6 +44,7 @@ Module.register("MMM-TelegramBot", {
     telecastLife: 1000 * 60 * 60 * 6,
     telecastLimit: 5,
     telecastHideOverflow: true,
+    dateFormat: "DD-MM-YYYY HH:mm:ss"
   },
   //requiresVersion: "2.1.2", // Required version of MagicMirror
 
@@ -230,7 +231,12 @@ Module.register("MMM-TelegramBot", {
         command: 'telecast',
         callback: 'TELBOT_telecast',
         description: this.translate("TELBOT_TELECAST"),
-      }
+      },
+      {
+        command: 'clean',
+        callback: 'TELBOT_clean',
+        description: this.translate("TELBOT_CLEAN"),
+      },
     ]
     defaultCommands.forEach((c) => {
       Register.add(c)
@@ -238,6 +244,17 @@ Module.register("MMM-TelegramBot", {
     this.config.customCommands.forEach((c)=>{
       Register.add(c)
     })
+  },
+
+  TELBOT_clean: function(command, handler) {
+     if (!this.config.telecast) {
+      var text = this.translate("TELBOT_TELECAST_FALSE")
+      handler.reply("TEXT", text, {parse_mode:"Markdown"})
+      return
+    }
+    this.chats = []
+    this.updateDom()
+    handler.reply("TEXT", this.translate("TELBOT_CLEAN_DONE"))
   },
 
   TELBOT_telecast: function(command, handler) {
