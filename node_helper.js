@@ -105,7 +105,7 @@ module.exports = NodeHelper.create({
       }
       // Not answer for Bot
       if (!this.config.telecast) return
-      if (String(this.config.telecast) !== String(msg.chat.id)) return
+      if (String(this.config.telecast) !== String(msg.chat.id) || !this.allowed.has(msg.from.username)) return
       this.processTelecast(msg)
     }
   },
