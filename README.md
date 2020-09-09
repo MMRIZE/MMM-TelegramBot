@@ -14,6 +14,7 @@ TelegramBot module for MagicMirror
  - add `telecastContainer` feature
  - add Play audio on received audio file
  - add Video play... (if codec is there...)
+ - add Voice audio ! @MIRCO
 
 **[1.3.4] 2020-09-07**
  - add `/clean` command for clean telecast screen

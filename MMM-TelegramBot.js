@@ -677,7 +677,7 @@ Module.register("MMM-TelegramBot", {
   },
 
   telecast: function(msgObj) {
-    if (!msgObj.text && !msgObj.photo && !msgObj.sticker && !msgObj.animation &&!msgObj.audio) return
+    if (!msgObj.text && !msgObj.photo && !msgObj.sticker && !msgObj.animation && !msgObj.audio && !msgObj.voice) return
     if (this.config.useSoundNotification) this.sound.src = "modules/MMM-TelegramBot/msg_incoming.mp3"
     while (this.chats.length >= this.config.telecastLimit) {
       this.chats.shift()
@@ -794,6 +794,16 @@ Module.register("MMM-TelegramBot", {
       audio.volume = 0.6
       audio.play()
       text.innerHTML = c.title ? c.title: (c.caption ? c.caption :"Audio")
+      bubble.appendChild(text)
+    }
+
+    if (c.chat._voice) {
+      var text = document.createElement("div")
+      text.classList.add("text")
+      var voice = new Audio(getImageURL(c.chat._voice))
+      voice.volume = 1.0
+      voice.play()
+      text.innerHTML = "Voice"
       bubble.appendChild(text)
     }
 
