@@ -790,7 +790,8 @@ Module.register("MMM-TelegramBot", {
     if (c.chat._audio) {
       var text = document.createElement("div")
       text.classList.add("text")
-      var audio = new Audio(getImageURL(c.chat._audio));
+      var audio = new Audio(getImageURL(c.chat._audio))
+      audio.volume = 0.6
       audio.play()
       text.innerHTML = c.title ? c.title: (c.caption ? c.caption :"Audio")
       bubble.appendChild(text)
