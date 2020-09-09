@@ -44,6 +44,7 @@ Module.register("MMM-TelegramBot", {
     telecastLife: 1000 * 60 * 60 * 6,
     telecastLimit: 5,
     telecastHideOverflow: true,
+    telecastContainer: 300,
     dateFormat: "DD-MM-YYYY HH:mm:ss"
   },
   //requiresVersion: "2.1.2", // Required version of MagicMirror
@@ -60,7 +61,8 @@ Module.register("MMM-TelegramBot", {
       "TELBOT_HELPER_RESTART" : this.translate("TELBOT_HELPER_RESTART"),
       "TELBOT_HELPER_WAKEUP" : this.translate("TELBOT_HELPER_WAKEUP"),
       "TELBOT_HELPER_MSG_COMING" : this.translate("TELBOT_HELPER_MSG_COMING"),
-      "TELBOT_HELPER_TOOOLDMSG" : this.translate("TELBOT_HELPER_TOOOLDMSG")
+      "TELBOT_HELPER_TOOOLDMSG" : this.translate("TELBOT_HELPER_TOOOLDMSG"),
+      "TELBOT_HELPER_SERVED": this.translate("TELBOT_HELP_SERVED", { module: "TelegramBot Service"})
     }
     this.sendSocketNotification('INIT', this.config)
     this.getCommands(
@@ -675,7 +677,7 @@ Module.register("MMM-TelegramBot", {
   },
 
   telecast: function(msgObj) {
-    if (!msgObj.text && !msgObj.photo && !msgObj.sticker && !msgObj.animation) return
+    if (!msgObj.text && !msgObj.photo && !msgObj.sticker && !msgObj.animation &&!msgObj.audio) return
     if (this.config.useSoundNotification) this.sound.src = "modules/MMM-TelegramBot/msg_incoming.mp3"
     while (this.chats.length >= this.config.telecastLimit) {
       this.chats.shift()
@@ -696,6 +698,12 @@ Module.register("MMM-TelegramBot", {
   getDom: function() {
     var dom = document.createElement("div")
     dom.id = "TELBOT"
+    if ((isNaN(this.config.telecastContainer)) || this.config.telecastContainer < 200 || this.config.telecastContainer > 1000) {
+      /** Wrong setting go to default **/
+      this.config.telecastContainer = this.defaults.telecastContainer
+    }
+    dom.setAttribute('style', "--container-width:" + this.config.telecastContainer + "px;");
+
     if (this.config.telecast) {
       dom.appendChild(this.getTelecastDom())
     }
@@ -741,7 +749,6 @@ Module.register("MMM-TelegramBot", {
       photo.classList.add("photo")
       var background = document.createElement("div")
       background.classList.add("background")
-      console.log(getImageURL(c.chat._photo))
       background.style.backgroundImage = `url(${getImageURL(c.chat._photo)})`
       photo.appendChild(background)
       var imageContainer = document.createElement("div")
@@ -763,8 +770,12 @@ Module.register("MMM-TelegramBot", {
       video.loop = true
       video.src = getImageURL(c.chat._video)
       video.addEventListener('loadeddata', () => {
-          console.log("Loaded the video's data!");
           anchor.scrollIntoView(false)
+      }, false)
+      video.addEventListener("error", (e) => {
+         delete c.chat._video
+         c.text = "Video Error!"
+         this.updateDom()
       }, false)
       bubble.appendChild(video)
     }
@@ -773,6 +784,15 @@ Module.register("MMM-TelegramBot", {
       var text = document.createElement("div")
       text.classList.add("text")
       text.innerHTML = c.text
+      bubble.appendChild(text)
+    }
+
+    if (c.chat._audio) {
+      var text = document.createElement("div")
+      text.classList.add("text")
+      var audio = new Audio(getImageURL(c.chat._audio));
+      audio.play()
+      text.innerHTML = c.title ? c.title: (c.caption ? c.caption :"Audio")
       bubble.appendChild(text)
     }
 

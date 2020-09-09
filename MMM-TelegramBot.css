@@ -1,18 +1,5 @@
-#TELBOT,
-.middle.center #TELBOT {
-  --container-width: 100%;
-  --font-size: 36px;
-  --profile-width: 160px;
-  --photo-height:400px;
-  --bubble-after-top: 30px;
-  text-align: center;
-}
-
-.left #TELBOT,
-.right #TELBOT,
-.center #TELBOT {
+#TELBOT {
   position:relative;
-  --container-width: 400px;
   --font-size: 18px;
   --overflow-max-height: 500px;
   --profile-width: 40px;
@@ -21,12 +8,10 @@
   text-align: left;
 }
 
-
 #TELBOT_ANCHOR {
   width:100%;
   height:1px;
 }
-
 
 #TELBOT .container {
   width: var(--container-width);
@@ -137,5 +122,3 @@
 	margin-top: -10px;
 	margin-left: -20px;
 }
-
-/* .bar, .center, .third

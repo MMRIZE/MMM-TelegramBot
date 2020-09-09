@@ -29,11 +29,13 @@ module.exports = NodeHelper.create({
     this.askSession = new Set()
     this.allowed = new Set()
     this.TB = null
+    this.counterInstance = 0
   },
 
   initialize: function(config) {
     this.config = config
     if (this.config.verbose) log = _log
+    console.log("[TELBOT] MMM-TelegramBot Version:",  require('./package.json').version)
     if (typeof config.adminChatId !== 'undefined') {
       this.adminChatId = this.config.adminChatId
     }
@@ -43,16 +45,64 @@ module.exports = NodeHelper.create({
         this.TB = new TelegramBot(config.telegramAPIKey, option)
         var me = this.TB.getMe()
       } catch (err) {
-        log(err)
+        return console.log("[TELBOT]", err)
       }
+
+      /** Catch polling errors TelegramBot Service **/
+      this.TB.on('polling_error', (error) => {
+        if (!error.response) {
+          error = {
+            response: {
+              body: {
+                error_code: "EFATAL",
+                description: "No internet ?"
+              }
+            }
+          }
+        }
+        console.log("[TELBOT] Error " + error.response.body.error_code, error.response.body.description)
+        var msg = {
+          type: 'TEXT',
+          text: null,
+          option: {
+            disable_notification: false,
+            parse_mode: 'Markdown'
+          }
+        }
+        if (error.response.body.error_code == "409") {
+          if (this.counterInstance >= 3) {
+            msg.text = "*[WARNING] This instance of TelegramBot is now stoped!*"
+            msg.text += "\n\n" + this.config.text["TELBOT_HELPER_SERVED"]
+            this.say(msg, true)
+            this.TB.stopPolling()
+          } else {
+            this.counterInstance += 1
+            msg.text = "*[WARNING] Make sure that only one TelegramBot instance is running!*",
+            msg.text += "\n\n" + this.config.text["TELBOT_HELPER_SERVED"]
+            this.say(msg, true)
+          }
+        }
+        if (error.response.body.error_code == "401" || error.response.body.error_code == "EFATAL") {
+          console.log("[TELBOT] stopPolling and waiting 1 min before retry...")
+          this.TB.stopPolling()
+          setTimeout(() => {
+            this.TB.startPolling()
+            console.log("[TELBOT] startPolling...")
+            msg.text = "*" + this.config.text["TELBOT_HELPER_WAKEUP"] + "*"
+            msg.text += "\n\n" + this.config.text["TELBOT_HELPER_SERVED"]
+            this.say(msg, true) // envoie un message pour verifer
+          } , 1000 * 60)
+        }
+      })
       if (this.adminChatId && this.config.useWelcomeMessage) {
         this.say(this.welcomeMsg())
+        console.log("[TELBOT] Ready!")
       }
       this.TB.on('message', (msg) =>{
         this.processMessage(msg)
       })
     } else {
-      log("Configuration fails.")
+      console.log("[TELBOT] Configuration fails.")
     }
   },
 
@@ -105,8 +155,9 @@ module.exports = NodeHelper.create({
       }
       // Not answer for Bot
       if (!this.config.telecast) return
-      if (!this.allowed.has(msg.from.username)) return
-      this.processTelecast(msg)
+      if (String(this.config.telecast) == String(msg.chat.id) || this.allowed.has(msg.from.username)) {
+        this.processTelecast(msg)
+      }
     }
   },
 
@@ -189,6 +240,14 @@ module.exports = NodeHelper.create({
       return animation.file_unique_id
     }
 
+    const processChatAudio = async (audio) => {
+      var fileId = audio.file_id
+      var link = await this.TB.getFileLink(fileId)
+      var file = path.resolve(__dirname, "cache", String(audio.file_unique_id))
+      await downloadFile(link, file)
+      return audio.file_unique_id
+    }
+
     var r = await clearCache(this.config.telecastLife)
     if (r instanceof Error) log (r)
     var profilePhoto = await processProfilePhoto()
@@ -203,7 +262,9 @@ module.exports = NodeHelper.create({
     if (msg.hasOwnProperty("animation")) { // pass animation as video
       msg.chat["_video"] = String(await processChatAnimated(msg.animation))
     }
-
+    if (msg.hasOwnProperty("audio")) {
+      msg.chat["_audio"] = String(await processChatAudio(msg.audio))
+    }
     callback(msg)
   },
 
@@ -240,6 +301,7 @@ module.exports = NodeHelper.create({
   },
 
   say: function(r, adminMode=false) {
+    if (!this.TB.isPolling()) return
     var chatId = (adminMode) ? this.adminChatId : r.chat_id
     var self = this
     switch(r.type) {
@@ -354,13 +416,13 @@ module.exports = NodeHelper.create({
   },
 
   onError: function(err, response) {
-    log("Error: " + err.code)
+    if (!this.TB.isPolling()) return
     if (typeof err.response !== 'undefined') {
-      log(err.response.body)
+      console.log("[TELBOT] ERROR" , err.response.body)
     } else {
-      log(err)
+      console.log("[TELBOT] ERROR", err.code)
     }
-    log("ERR_RESPONSE", response)
+    //log("ERR_RESPONSE", response)
     if (err.code !== 'EFATAL') {
       var text = '`ERROR`\n'
         + "```\n"
