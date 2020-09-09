@@ -8,7 +8,7 @@ TelegramBot module for MagicMirror
 
 ## New Updates
 
-**[1.3.5-1.3.6] 2020-09-08
+**[1.3.5-1.3.6] 2020-09-08**
  - add telecast directly on allowedUser
  - add emojis (@eouia purpose)
  - add `telecastContainer` feature
