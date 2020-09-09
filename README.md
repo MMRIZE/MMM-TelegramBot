@@ -8,6 +8,13 @@ TelegramBot module for MagicMirror
 
 ## New Updates
 
+**[1.3.5-1.3.6] 2020-09-08
+ - add telecast directly on allowedUser
+ - add emojis (@eouia purpose)
+ - add `telecastContainer` feature
+ - add Play audio on received audio file
+ - add Video play... (if codec is there...)
+
 **[1.3.4] 2020-09-07**
  - add `/clean` command for clean telecast screen
  - update `fr` translations
@@ -140,6 +147,9 @@ npm install
 
     /** add since 1.3.4 **/
     dateFormat: "DD-MM-YYYY HH:mm:ss"
+
+    /** add since 1.3.6 **/
+    telecastContainer: 300
   }
 },
 ```
@@ -175,7 +185,14 @@ commandAllowed: {
 - **`useSoundNotification`** : Use Official notification sound, on incomming messages
 
 - **`dateFormat`** : Your prefered date format
+- **`telecastContainer`**: force le with of the telecast container in px. Default: 300, mini: 200, max : 1000
 
+4. Updating
+```
+cd ~/MagicMirror/modules/MMM-TelegramBot
+git pull
+npm install
+```
 
 ## Update History
 **[1.2.2] 2020-03-23**

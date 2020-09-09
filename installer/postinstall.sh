@@ -25,4 +25,9 @@ source utils.sh
 # module name
 Installer_module="TelegramBot"
 
+Installer_info "Install Emojis..."
+mkdir ~/.fonts &>/dev/null
+cp -f *.ttf ~/.fonts/
+fc-cache -f -v &>/dev/null
+
 Installer_info "$Installer_module is now installed !"
