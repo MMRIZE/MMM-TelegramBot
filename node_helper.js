@@ -265,6 +265,11 @@ module.exports = NodeHelper.create({
     if (msg.hasOwnProperty("audio")) {
       msg.chat["_audio"] = String(await processChatAudio(msg.audio))
     }
+
+    if (msg.hasOwnProperty("voice")) {
+      msg.chat["_voice"] = String(await processChatAudio(msg.voice))
+    }
+
     callback(msg)
   },
 
