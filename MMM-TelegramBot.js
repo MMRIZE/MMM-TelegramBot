@@ -64,6 +64,7 @@ Module.register("MMM-TelegramBot", {
       "TELBOT_HELPER_TOOOLDMSG" : this.translate("TELBOT_HELPER_TOOOLDMSG"),
       "TELBOT_HELPER_SERVED": this.translate("TELBOT_HELP_SERVED", { module: "TelegramBot Service"})
     }
+    this.config = configMerge({}, this.defaults, this.config)
     this.sendSocketNotification('INIT', this.config)
     this.getCommands(
       new TelegramBotCommandRegister(this, this.registerCommand.bind(this))
@@ -93,7 +94,7 @@ Module.register("MMM-TelegramBot", {
   },
 
   getScripts: function() {
-    return ["TELBOT_lib.js"]
+    return ["TELBOT_lib.js", "configMerge.min.js"]
   },
 
   registerCommand: function(module, commandObj) {
