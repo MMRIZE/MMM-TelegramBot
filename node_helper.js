@@ -96,8 +96,8 @@ module.exports = NodeHelper.create({
       })
       if (this.adminChatId && this.config.useWelcomeMessage) {
         this.say(this.welcomeMsg())
-        console.log("[TELBOT] Ready!")
       }
+      console.log("[TELBOT] Ready!")
       this.TB.on('message', (msg) =>{
         this.processMessage(msg)
       })
