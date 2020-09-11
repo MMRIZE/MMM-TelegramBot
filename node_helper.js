@@ -30,10 +30,12 @@ module.exports = NodeHelper.create({
     this.allowed = new Set()
     this.TB = null
     this.counterInstance = 0
+    this.TBService = true
   },
 
   initialize: function(config) {
     this.config = config
+    this.TBService = this.config.TelegramBotServiceAlerte
     if (this.config.verbose) log = _log
     console.log("[TELBOT] MMM-TelegramBot Version:",  require('./package.json').version)
     if (typeof config.adminChatId !== 'undefined') {
@@ -48,7 +50,18 @@ module.exports = NodeHelper.create({
         return console.log("[TELBOT]", err)
       }
 
-      /** Catch polling errors TelegramBot Service **/
+      /** Catch any errors TelegramBot Service
+       *  303 SEE_OTHER
+       *  400 BAD_REQUEST
+       *  401 UNAUTHORIZED
+       *  403 FORBIDDEN
+       *  404 NOT_FOUND
+       *  406 NOT_ACCEPTABLE
+       *  409 MULTI_INSTANCE
+       *  420 FLOOD
+       *  500 INTERNAL
+       *  and others
+      **/
       this.TB.on('polling_error', (error) => {
         if (!error.response) {
           error = {
@@ -69,31 +82,55 @@ module.exports = NodeHelper.create({
             parse_mode: 'Markdown'
           }
         }
-        if (error.response.body.error_code == "409") {
-          if (this.counterInstance >= 3) {
-            msg.text = "*[WARNING] This instance of TelegramBot is now stoped!*"
-            msg.text += "\n\n" + this.config.text["TELBOT_HELPER_SERVED"]
-            this.say(msg, true)
+        switch (error.response.body.error_code) {
+          case 409:
+            if (this.counterInstance >= 3) {
+              if (this.TBService) {
+                msg.text = "*[WARNING] This instance of TelegramBot is now stoped!*"
+                msg.text += "\n\n" + this.config.text["TELBOT_HELPER_SERVED"]
+                this.say(msg, true)
+              } else {
+                console.log("[TELBOT] stopPolling...")
+              }
+              this.TB.stopPolling()
+            } else {
+              this.counterInstance += 1
+              if (this.TBService) {
+                msg.text = "*[WARNING] Make sure that only one TelegramBot instance is running!*",
+                msg.text += "\n\n" + this.config.text["TELBOT_HELPER_SERVED"]
+                this.say(msg, true)
+              }
+            }
+            break
+          case "EFATAL":
+          case 401:
+          case 420:
+            console.log("[TELBOT] stopPolling and waiting 1 min before retry...")
             this.TB.stopPolling()
-          } else {
-            this.counterInstance += 1
-            msg.text = "*[WARNING] Make sure that only one TelegramBot instance is running!*",
-            msg.text += "\n\n" + this.config.text["TELBOT_HELPER_SERVED"]
-            this.say(msg, true)
-          }
-        }
-        if (error.response.body.error_code == "401" || error.response.body.error_code == "EFATAL") {
-          console.log("[TELBOT] stopPolling and waiting 1 min before retry...")
-          this.TB.stopPolling()
-          setTimeout(() => {
-            this.TB.startPolling()
-            console.log("[TELBOT] startPolling...")
-            msg.text = "*" + this.config.text["TELBOT_HELPER_WAKEUP"] + "*"
-            msg.text += "\n\n" + this.config.text["TELBOT_HELPER_SERVED"]
-            this.say(msg, true) // envoie un message pour verifer
-          } , 1000 * 60)
+            setTimeout(() => {
+              this.TB.startPolling()
+              console.log("[TELBOT] startPolling...")
+              if (this.TBService) {
+                msg.text = "*" + this.config.text["TELBOT_HELPER_WAKEUP"] + "*\n"
+                msg.text += "Error: "+ error.response.body.error_code + "\n"
+                msg.text += "Description: " + error.response.body.description
+                msg.text += "\n\n" + this.config.text["TELBOT_HELPER_SERVED"]
+                this.say(msg, true)
+              }
+            } , 1000 * 60)
+            break
+          default:
+            if (this.TBService) {
+              msg.text = "*[WARNING] An error has occurred!*\n"
+              msg.text += "Error: "+ error.response.body.error_code + "\n"
+              msg.text += "Description: " + error.response.body.description
+              msg.text += "\n\n" + this.config.text["TELBOT_HELPER_SERVED"]
+              this.say(msg, true)
+            }
+            break
         }
       })
+      /** end of TelegramBot Service **/
       if (this.adminChatId && this.config.useWelcomeMessage) {
         this.say(this.welcomeMsg())
       }

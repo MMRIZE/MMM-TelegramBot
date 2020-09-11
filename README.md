@@ -1,5 +1,6 @@
 # MMM-TelegramBot
-TelegramBot module for MagicMirror
+TelegramBot module for MagicMirror<br>
+Coded by @eouia and @bugsounet
 
 ## Feature
 - You can remote-control your `MagicMirror` and modules within `Telegram`.
@@ -7,6 +8,9 @@ TelegramBot module for MagicMirror
 - Other module developers can add their commands easily. (See the Wiki : https://github.com/bugsounet/MMM-TelegramBot/wiki )
 
 ## New Updates
+
+**[1.3.7] 2020-09-11
+ - add TelegramBot Service (catch all Errors of Telegram)
 
 **[1.3.5-1.3.6] 2020-09-08**
  - add telecast directly on allowedUser
@@ -147,10 +151,13 @@ npm install
     useSoundNotification: true,
 
     /** add since 1.3.4 **/
-    dateFormat: "DD-MM-YYYY HH:mm:ss"
+    dateFormat: "DD-MM-YYYY HH:mm:ss",
 
     /** add since 1.3.6 **/
-    telecastContainer: 300
+    telecastContainer: 300,
+
+    /** add since 1.3.7 **/
+    TelegramBotServiceAlerte: true
   }
 },
 ```
@@ -184,9 +191,9 @@ commandAllowed: {
 ```
 
 - **`useSoundNotification`** : Use Official notification sound, on incomming messages
-
 - **`dateFormat`** : Your prefered date format
 - **`telecastContainer`**: force le with of the telecast container in px. Default: 300, mini: 200, max : 1000
+- **`TelegramBotServiceAlerte`**: Display all Alert of `TelegramBot Service`
 
 4. Updating
 ```

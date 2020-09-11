@@ -2,7 +2,7 @@
 /* Magic Mirror
  * Module: MMM-TelegramBot
  *
- * By eouia
+ * By eouia & @bugsounet
  */
  String.prototype.toRegExp = function() {
    var lastSlash = this.lastIndexOf("/")
@@ -27,6 +27,7 @@ Module.register("MMM-TelegramBot", {
     alertTimer: "30000",
     useWelcomeMessage: true,
     useSoundNotification: true,
+    TelegramBotServiceAlerte: true,
     verbose:false,
     screenshotScript: "scrot",
     detailOption: {},
