@@ -9,7 +9,7 @@ Coded by @eouia and @bugsounet
 
 ## New Updates
 
-**[1.3.7] 2020-09-11
+**[1.3.7] 2020-09-11**
  - add TelegramBot Service (catch all Errors of Telegram)
 
 **[1.3.5-1.3.6] 2020-09-08**
