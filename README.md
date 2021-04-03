@@ -9,10 +9,10 @@ Coded by @eouia and @bugsounet
 
 ## New Updates
 
-**[1.3.8] 2021-04-03
+**[1.3.8] 2021-04-03**
  - add Spanish translation (thx to CalcU)
 
-**[1.3.7] 2020-09-11
+**[1.3.7] 2020-09-11**
  - add TelegramBot Service (catch all Errors of Telegram)
 
 **[1.3.5-1.3.6] 2020-09-08**
@@ -248,6 +248,9 @@ npm install
 
 ## More Information
 See the [Wiki](https://github.com/bugsounet/MMM-TelegramBot/wiki)
+
+## Support and Helping
+Support is now on [the 4th Party Modules Forum](http://forum.bugsounet.fr)
 
 ## Donate
  [Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TTHRH94Y4KL36&source=url), if you love this module !
