@@ -421,7 +421,9 @@ module.exports = NodeHelper.create({
   socketNotificationReceived: function (notification, payload) {
     switch(notification) {
       case 'INIT':
-        this.initialize(payload)
+        if (this.TB === null) {
+          this.initialize(payload)
+        }
         break;
       case 'REPLY':
       case 'SAY':
