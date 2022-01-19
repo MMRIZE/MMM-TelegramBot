@@ -86,7 +86,7 @@ module.exports = NodeHelper.create({
           case 409:
             if (this.counterInstance >= 3) {
               if (this.TBService) {
-                msg.text = "*[WARNING] This instance of TelegramBot is now stoped!*"
+                msg.text = "*[WARNING] This instance of TelegramBot is now stopped!*"
                 msg.text += "\n\n" + this.config.text["TELBOT_HELPER_SERVED"]
                 this.say(msg, true)
               } else {
