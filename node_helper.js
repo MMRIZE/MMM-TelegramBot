@@ -423,38 +423,42 @@ module.exports = NodeHelper.create({
       case 'INIT':
         if (this.TB === null) {
           this.initialize(payload)
+        } else {
+          console.log("[TELBOT] Already running!")
         }
         break;
       case 'REPLY':
       case 'SAY':
-        this.say(payload)
+        if (this.TB) this.say(payload)
         break;
       case 'SAY_ADMIN':
-        this.say(payload, true)
+        if (this.TB) this.say(payload, true)
         break;
       case 'ASK':
-        this.ask(payload)
+        if (this.TB) this.ask(payload)
         break;
       case 'ALLOWEDUSER':
-        this.allowed = new Set(payload)
+        if (this.TB) {
+          this.allowed = new Set(payload)
+        }
         break;
       case 'REBOOT':
-        this.shell('sudo reboot')
+        if (this.TB) this.shell('sudo reboot')
         break;
       case 'SHUTDOWN':
-        this.shell('sudo shutdown now')
+        if (this.TB) this.shell('sudo shutdown now')
         break;
       case 'PM2': //? used????
-        this.shell('pm2 ' + payload)
+        if (this.TB) this.shell('pm2 ' + payload)
         break;
       case 'SHELL':
-        this.shell(payload.exec, payload.session)
+        if (this.TB) this.shell(payload.exec, payload.session)
         break
       case 'SCREENSHOT':
-        this.screenshot(payload.session)
+        if (this.TB) this.screenshot(payload.session)
         break
       case 'FORCE_TELECAST':
-        this.processTelecast(payload)
+        if (this.TB) this.processTelecast(payload)
         break
     }
   },
