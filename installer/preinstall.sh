@@ -52,9 +52,11 @@ if  [ "$platform" == "osx" ]; then
 else
   Installer_success "OS Detected: $OSTYPE ($os_name $os_version $arch)"
   dependencies=(scrot)
-  Installer_info "Checking all dependencies..."
-  Installer_check_dependencies
-  Installer_success "All Dependencies needed are installed !"
+  [ "${__NO_DEP_CHECK__}" ] || {
+    Installer_info "Checking all dependencies..."
+    Installer_check_dependencies
+    Installer_success "All Dependencies needed are installed !"
+  }
 fi
 
 echo
