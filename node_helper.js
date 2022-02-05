@@ -525,7 +525,7 @@ module.exports = NodeHelper.create({
   },
 
   screenshot: function(sessionId = null, callback=null) {
-    var command = this.config.screenshotScript + " screenshot.png"
+    var command = "scrot -o " + __dirname + "/screenshot/screenshot.png"
     var t = new moment()
     var retObj = {
       session: sessionId,

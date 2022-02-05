@@ -6,7 +6,7 @@
 #--------------
 
 # postinstaller version
-Installer_vinstaller="1.0.9 by Bugsounet"
+Installer_vinstaller="2.0.0 by Bugsounet"
 
 # debug mode
 Installer_debug=false
@@ -78,21 +78,6 @@ Installer_check_dependencies () {
     Installer_warning "Please logout and login for new group permissions to take effect, then restart npm install"
     exit
   fi
-}
-
-# Do electron rebuild
-Installer_electronrebuild () {
-	cd ..
-	Installer_pwd="$(pwd)"
-	Installer_debug "Current diectory: $Installer_pwd"
-	Installer_info "Installing electron-rebuild..."
-	Installer_debug "npm install --save-dev electron-rebuild"
-	npm install --save-dev electron-rebuild || exit 1
-	Installer_success "Electron-rebuild installed"
-	Installer_info "Execute electron-rebuild..."
-	Installer_warning "It could takes 10~30 minutes."
-	Installer_debug "./node_modules/.bin/electron-rebuild"
-	./node_modules/.bin/electron-rebuild || exit 1
 }
 
 # add timestamps and delete colors code for log file
@@ -305,95 +290,6 @@ Installer_remove () {
       fi
     fi
   fi
-}
-
-## Check Audio outpout
-Installer_checkaudio () {
-  play_hw="${play_hw:-hw:0,0}"
-  plug_play="${plug_play:-plughw:0}"
-  while true; do
-    if Installer_info "Checking audio output..."
-      Installer_yesno "Make sure your speakers are on press [Yes].\nPress [No] if you don't want to check." true >/dev/null; then
-      echo
-      Installer_debug "Actual test input config: $play_hw ($plug_play)"
-      aplay -D $plug_play "beep_check.wav" 2>/dev/null || Installer_error "Current configuration not working !"
-      Installer_yesno "Did you hear Google beep?" true >/dev/null && break
-      echo
-      Installer_warning "Selection of the speaker device"
-      #aplay -l
-      devices="$(aplay -l | grep ^car)"
-      Installer_info "$devices"
-      read -p "Indicate the card # to use [0-9]: " card
-      read -p "Indicate the device # to use [0-9]: " device
-      play_hw="hw:$card,$device"
-      plug_play="plughw:$card"
-      Installer_info "you have selected: $play_hw ($plug_play)"
-      #Installer_debug "Set Alsa conf"
-      #update_alsa $play_hw $rec_hw
-    else
-      play_hw=""
-      plug_play=""
-      break
-    fi
-  done
-}
-
-# Check Microphone
-Installer_checkmic () {
-  audiofile="testmic.wav"
-  rec_hw="${rec_hw:-hw:0,0}"
-  plug_rec="${plug_rec:-plughw:0}"
-  while true; do
-    if Installer_info "Checking audio input..."
-      Installer_yesno "Make sure your microphone is on, press [Yes] and say something.\nPress [No] if you don't want to check." true >/dev/null; then
-      echo
-      Installer_debug "Actual test input config: $rec_hw ($plug_rec)"
-      rm -f $audiofile
-      arecord -D $plug_rec -r 16000 -c 1 -d 3 -t wav -f S16_LE $audiofile 2>/dev/null || Installer_error "Current configuration not Working !"
-      if [ -f $audiofile ]; then
-        play $audiofile
-        Installer_yesno "Did you hear yourself?" true >/dev/null && break
-      fi
-      echo
-      Installer_warning "Selection of the microphone device"
-      #arecord -l
-      devices="$(arecord -l | grep ^car)"
-      Installer_info "$devices"
-      read -p "Indicate the card # to use [0-9]: " card
-      read -p "Indicate the device # to use [0-9]: " device
-      rec_hw="hw:$card,$device"
-      plug_rec="plughw:$card"
-      Installer_info "you have selected: $rec_hw ($plug_rec)"
-      #update_alsa $play_hw $rec_hw
-    else
-      rec_hw=""
-      plug_rec=""
-      break
-    fi
-  done
-  rm -f $audiofile
- }
-
-# Updates alsa user config at ~/.asoundrc
-# $1 - play_hw
-# $2 - rec_hw
-update_alsa () { # usage: update_alsa $play_hw $rec_hw
-    Installer_warning "Updating ~/.asoundrc..."
-    cat<<EOM > ~/.asoundrc
-pcm.!default {
-  type asym
-   playback.pcm {
-     type plug
-     slave.pcm "$1"
-   }
-   capture.pcm {
-     type plug
-     slave.pcm "$2"
-   }
-}
-EOM
-    Installer_warning "Reloading Alsa..."
-    sudo /etc/init.d/alsa-utils restart
 }
 
 Installer_debug "[LOADED] utils.sh"

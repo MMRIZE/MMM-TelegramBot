@@ -29,7 +29,6 @@ Module.register("MMM-TelegramBot", {
     useSoundNotification: true,
     TelegramBotServiceAlerte: true,
     verbose:false,
-    screenshotScript: "scrot",
     detailOption: {},
     //if you want this module to work behind local proxy, try this. (experimental)
     /*
@@ -48,7 +47,6 @@ Module.register("MMM-TelegramBot", {
     telecastContainer: 300,
     dateFormat: "DD-MM-YYYY HH:mm:ss"
   },
-  //requiresVersion: "2.1.2", // Required version of MagicMirror
 
   start: function() {
     this.isAlreadyInitialized = 0
@@ -274,11 +272,6 @@ Module.register("MMM-TelegramBot", {
   },
 
   TELBOT_screenshot: function(command, handler) {
-    if (!this.config.screenshotScript) {
-      var text = this.translate("TELBOT_SCREENSHOT_NULL")
-      handler.reply("TEXT", text, {parse_mode:"Markdown"})
-      return
-    }
     var sessionId = Date.now() + "_" + this.commonSession.size
     this.commonSession.set(sessionId, handler)
     this.sendSocketNotification("SCREENSHOT", {session: sessionId})

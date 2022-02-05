@@ -27,6 +27,6 @@
   "homepage": "https://github.com/bugsounet/MMM-TelegramBot",
   "dependencies": {
     "moment": "^2.18.1",
-    "node-telegram-bot-api": "^0.28.0"
+    "node-telegram-bot-api": "0.28.0"
   }
 }
