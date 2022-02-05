@@ -525,12 +525,13 @@ module.exports = NodeHelper.create({
   },
 
   screenshot: function(sessionId = null, callback=null) {
-    var command = "scrot -o " + __dirname + "/screenshot/screenshot.png"
+    var shotDir = path.resolve(__dirname, "screenshot")
+    var command = "scrot -o " + shotDir + "/screenshot.png"
     var t = new moment()
     var retObj = {
       session: sessionId,
       timestamp: t.format(this.config.dateFormat),
-      path: path.resolve("screenshot.png"),
+      path: + shotDir + "/screenshot.png",
       result: "",
       status: false
     }
