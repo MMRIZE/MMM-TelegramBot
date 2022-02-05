@@ -531,7 +531,7 @@ module.exports = NodeHelper.create({
     var retObj = {
       session: sessionId,
       timestamp: t.format(this.config.dateFormat),
-      path: + shotDir + "/screenshot.png",
+      path: shotDir + "/screenshot.png",
       result: "",
       status: false
     }
