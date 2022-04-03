@@ -1,6 +1,6 @@
 {
   "name": "MMM-TelegramBot",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "TelegramBot module for remote-controlling MagicMirror.",
   "main": "MMM-TelegramBot.js",
   "scripts": {

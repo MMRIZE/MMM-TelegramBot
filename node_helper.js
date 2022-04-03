@@ -25,7 +25,7 @@ module.exports = NodeHelper.create({
     this.config = {}
     this.commands = []
     this.callsigns = []
-    this.adminChatId = ""
+    this.adminChatId = undefined
     this.askSession = new Set()
     this.allowed = new Set()
     this.TB = null
@@ -343,57 +343,56 @@ module.exports = NodeHelper.create({
   },
 
   say: function(r, adminMode=false) {
-    if (!this.TB.isPolling()) return
     var chatId = (adminMode) ? this.adminChatId : r.chat_id
-    var self = this
+    if (!this.TB.isPolling() || !chatId) return
     switch(r.type) {
       case 'VOICE_PATH':
         var data = fs.readFileSync(r.path);
-        this.TB.sendVoice(chatId, data, r.option).catch((e) => {self.onError(e, r)})
+        this.TB.sendVoice(chatId, data, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'VOICE_URL':
-        this.TB.sendVoice(chatId, r.path, r.option).catch((e) => {self.onError(e, r)})
+        this.TB.sendVoice(chatId, r.path, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'VIDEO_PATH':
         var data = fs.readFileSync(r.path);
-        this.TB.sendVideo(chatId, data, r.option).catch((e) => {self.onError(e, r)})
+        this.TB.sendVideo(chatId, data, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'VIDEO_URL':
-        this.TB.sendVideo(chatId, r.path, r.option).catch((e) => {self.onError(e, r)})
+        this.TB.sendVideo(chatId, r.path, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'DOCUMENT_PATH':
         var data = fs.readFileSync(r.path);
-        this.TB.sendDocument(chatId, data, r.option).catch((e) => {self.onError(e, r)})
+        this.TB.sendDocument(chatId, data, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'DOCUMENT_URL':
-        this.TB.sendDocument(chatId, r.path, r.option).catch((e) => {self.onError(e, r)})
+        this.TB.sendDocument(chatId, r.path, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'PHOTO_PATH':
         var data = fs.readFileSync(r.path);
-        this.TB.sendPhoto(chatId, data, r.option).catch((e) => {self.onError(e, r)})
+        this.TB.sendPhoto(chatId, data, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'PHOTO_URL':
-        this.TB.sendPhoto(chatId, r.path, r.option).catch((e) => {self.onError(e, r)})
+        this.TB.sendPhoto(chatId, r.path, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'AUDIO_PATH':
         var data = fs.readFileSync(r.path);
-        this.TB.sendAudio(chatId, data, r.option).catch((e) => {self.onError(e, r)})
+        this.TB.sendAudio(chatId, data, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'AUDIO_URL':
-        this.TB.sendAudio(chatId, r.path, r.option).catch((e) => {self.onError(e, r)})
+        this.TB.sendAudio(chatId, r.path, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'LOCATION':
-        this.TB.sendLocation(chatId, r.latitude, r.longitude, r.option).catch((e) => {self.onError(e, r)})
+        this.TB.sendLocation(chatId, r.latitude, r.longitude, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'VENUE':
-        this.TB.sendVenue(chatId, r.latitude, r.longitude, r.title, r.address, r.option).catch((e) => {self.onError(e, r)})
+        this.TB.sendVenue(chatId, r.latitude, r.longitude, r.title, r.address, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'CONTACT':
-        this.TB.sendContact(chatId, r.phoneNumber, r.firstName, r.option).catch((e) => {self.onError(e, r)})
+        this.TB.sendContact(chatId, r.phoneNumber, r.firstName, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'TEXT':
       default:
-        this.TB.sendMessage(chatId, r.text, r.option).catch((e) => {self.onError(e, r)})
+        this.TB.sendMessage(chatId, r.text, r.option).catch((e) => {this.onError(e, r)})
         break;
     }
   },
@@ -402,7 +401,6 @@ module.exports = NodeHelper.create({
     var chatId = (adminMode) ? this.adminChatId : r.chat_id
     var sessionId = r.askSession.session_id
 
-    var self = this
     switch(r.type) {
       case 'TEXT':
         this.TB.sendMessage(chatId, r.text, r.option)
@@ -413,7 +411,7 @@ module.exports = NodeHelper.create({
               time:moment().format('X')
             })
           })
-          .catch((e) => {self.onError(e, r)})
+          .catch((e) => {this.onError(e, r)})
         break;
     }
   },
@@ -470,7 +468,7 @@ module.exports = NodeHelper.create({
     } else {
       console.log("[TELBOT] ERROR", err.code)
     }
-    //log("ERR_RESPONSE", response)
+
     if (err.code !== 'EFATAL') {
       var text = '`ERROR`\n'
         + "```\n"
@@ -489,17 +487,6 @@ module.exports = NodeHelper.create({
         }
       }
       this.say(msg, true)
-
-      /** disabled -> infinite loop **/
-      /** only sended to admin **/
-      /*
-      msg = {
-        type: 'TEXT',
-        chat_id: response.chat_id,
-        text: this.config.text["TELBOT_HELPER_ERROR"]
-      }
-      this.say(msg)
-      */
     }
   },
 
