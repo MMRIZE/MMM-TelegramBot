@@ -56,5 +56,15 @@
   "TELBOT_TELECAST": "Einen Chat auf den MagicMirror telecasten.",
   "TELBOT_TELECAST_FALSE": "Telecast ist nicht aktiviert oder nicht erlaubt.",
   "TELBOT_CLEAN": "Telecast-Anzeige zurücksetzen.",
-  "TELBOT_CLEAN_DONE" : "Telecast-Anzeige ist zurückgesetzt."
+  "TELBOT_CLEAN_DONE" : "Telecast-Anzeige ist zurückgesetzt.",
+  "TELBOT_HIDE": "Verstecke angegebenes Modul.",
+  "TELBOT_HIDE_ALREADY": " ist bereits versteckt.",
+  "TELBOT_HIDE_DONE": " ist jetzt versteckt.",
+  "TELBOT_HIDE_LOCKED": " ist durch einen anderen Prozess gesperrt und kann nicht versteckt werden.",
+  "TELBOT_SHOW": "Zeige angegebenes Modul.",
+  "TELBOT_SHOW_ALREADY": " ist bereits angezeigt.",
+  "TELBOT_SHOW_DONE": " wird jetzt angezeigt.",
+  "TELBOT_SHOW_LOCKED": " ist durch einen anderen Prozess gesperrt und kann nicht angezeigt werden.",
+  "TELBOT_MODULE_NOTFOUND": "Modul nicht gefunden: ",
+  "TELBOT_MODULE_NAME": "Name des Moduls fehlt."
 }

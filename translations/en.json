@@ -56,5 +56,15 @@
   "TELBOT_TELECAST": "Telecast a chat to MagicMirror screen",
   "TELBOT_TELECAST_FALSE": "Telecast is not activated or allowed.",
   "TELBOT_CLEAN": "Clean telecast screen",
-  "TELBOT_CLEAN_DONE" : "Telecast screen is cleaned"
+  "TELBOT_CLEAN_DONE" : "Telecast screen is cleaned",
+  "TELBOT_HIDE": "hide desired module",
+  "TELBOT_HIDE_ALREADY": " is already hidden",
+  "TELBOT_HIDE_DONE": " is now hidden",
+  "TELBOT_HIDE_LOCKED": " is locked by another program, can't hidden it",
+  "TELBOT_SHOW": "show desired module",
+  "TELBOT_SHOW_ALREADY": " is already shown",
+  "TELBOT_SHOW_DONE": " is now shown",
+  "TELBOT_SHOW_LOCKED": " is already locked by another program, can't show it",
+  "TELBOT_MODULE_NOTFOUND": "Module not found: ",
+  "TELBOT_MODULE_NAME": "Name of the module missing"
 }

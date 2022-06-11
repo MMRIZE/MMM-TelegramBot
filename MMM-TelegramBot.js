@@ -180,6 +180,16 @@ Module.register("MMM-TelegramBot", {
         callback : 'TELBOT_showall',
       },
       {
+        command: 'hide',
+        description : this.translate("TELBOT_HIDE"),
+        callback : 'TELBOT_hide',
+      },
+      {
+        command: 'show',
+        description : this.translate("TELBOT_SHOW"),
+        callback : 'TELBOT_show',
+      },
+      {
         command: 'alert',
         description : this.translate("TELBOT_ALERT"),
         callback : 'TELBOT_alert',
@@ -395,7 +405,7 @@ Module.register("MMM-TelegramBot", {
     var text = this.translate("TELBOT_HIDEALL_RESULT")
     var lockString = this.name
     MM.getModules().enumerate((m)=> {
-      m.hide(0, {lockString:lockString})
+      m.hide(500, {lockString:"TB_LOCK"})
     })
     handler.reply("TEXT", text, {parse_mode:'Markdown'})
   },
@@ -404,9 +414,69 @@ Module.register("MMM-TelegramBot", {
     var text = this.translate("TELBOT_SHOWALL_RESULT")
     var lockString = this.name
     MM.getModules().enumerate((m)=> {
-      m.show(0, {lockString:lockString})
+      m.show(500, {lockString:"TB_LOCK"})
     })
     handler.reply("TEXT", text, {parse_mode:'Markdown'})
+  },
+
+  TELBOT_hide: function(command, handler) {
+    var found = false
+    var unlock = false
+    if (handler.args) {
+      MM.getModules().enumerate((m)=> {
+        if (m.name == handler.args) {
+          found = true
+          if (m.hidden) return handler.reply("TEXT", handler.args + this.translate("TELBOT_HIDE_ALREADY"))
+          if (m.lockStrings.length > 0) {
+            m.lockStrings.forEach( lock => {
+              if (lock == "TB_LOCK") {
+                m.hide(500, {lockString: "TB_LOCK"})
+                if (m.lockStrings.length == 0) {
+                  unlock = true
+                  handler.reply("TEXT", handler.args + this.translate("TELBOT_HIDE_DONE"))
+                }
+              }
+            })
+            if (!unlock) return handler.reply("TEXT", handler.args + this.translate("TELBOT_HIDE_LOCKED"))
+          }
+          else {
+            m.hide(500, {lockString: "TB_LOCK"})
+            handler.reply("TEXT", handler.args + this.translate("TELBOT_HIDE_DONE"))
+          }
+        }
+      })
+      if (!found) handler.reply("TEXT", this.translate("TELBOT_MODULE_NOTFOUND") + handler.args)
+    } else return handler.reply("TEXT", this.translate("TELBOT_MODULE_NAME"))
+  },
+
+  TELBOT_show: function(command, handler) {
+    var found = false
+    var unlock = false
+    if (handler.args) {
+      MM.getModules().enumerate((m)=> {
+        if (m.name == handler.args) {
+          found = true
+          if (!m.hidden) return handler.reply("TEXT", handler.args + this.translate("TELBOT_SHOW_ALREADY"))
+          if (m.lockStrings.length > 0) {
+            m.lockStrings.forEach( lock => {
+              if (lock == "TB_LOCK") {
+                m.show(500, {lockString: "TB_LOCK"})
+                if (m.lockStrings.length == 0) {
+                  unlock = true
+                  handler.reply("TEXT", handler.args + this.translate("TELBOT_SHOW_DONE"))
+                }
+              }
+            })
+            if (!unlock) return handler.reply("TEXT", handler.args + this.translate("TELBOT_SHOW_LOCKED"))
+          }
+          else {
+            m.show(500, {lockString: "TB_LOCK"})
+            handler.reply("TEXT", handler.args + this.translate("TELBOT_SHOW_DONE"))
+          }
+        }
+      })
+      if (!found) handler.reply("TEXT", this.translate("TELBOT_MODULE_NOTFOUND") + handler.args)
+    } else return handler.reply("TEXT", this.translate("TELBOT_MODULE_NAME"))
   },
 
   TELBOT_allowed: function(command, handler) {

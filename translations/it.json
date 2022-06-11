@@ -56,5 +56,15 @@
   "TELBOT_TELECAST": "Trasmetti una chat sul tuo MagicMirror",
   "TELBOT_TELECAST_FALSE": "Trasmissione non attiva o disabilitata.",
   "TELBOT_CLEAN": "Pulire lo schermo della telecast",
-  "TELBOT_CLEAN_DONE" : "Pulisco telecast finestra"
+  "TELBOT_CLEAN_DONE" : "Pulisco telecast finestra",
+  "TELBOT_HIDE": "nascondi il modulo scelto",
+  "TELBOT_HIDE_ALREADY": " è già nascosto",
+  "TELBOT_HIDE_DONE": " è ora nascosto",
+  "TELBOT_HIDE_LOCKED": " è bloccato da un altro programma, non lo posso nascondere",
+  "TELBOT_SHOW": "mostra il modulo indicato",
+  "TELBOT_SHOW_ALREADY": " è già mostrato",
+  "TELBOT_SHOW_DONE": " è ora mostrato",
+  "TELBOT_SHOW_LOCKED": " è già bloccato da un altro programma, non lo posso mostrare",
+  "TELBOT_MODULE_NOTFOUND": "modulo non trovato: ",
+  "TELBOT_MODULE_NAME": "nome del modulo mancante"
 }
