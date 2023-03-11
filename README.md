@@ -4,7 +4,7 @@
 
 
 TelegramBot module for MagicMirror<br>
-Coded by @eouia and @bugsounet
+
 
 # Feature
 - You can remote-control your `MagicMirror` and modules within `Telegram`.
@@ -18,6 +18,4 @@ Coded by @eouia and @bugsounet
 ![](https://raw.githubusercontent.com/bugsounet/MMM-TelegramBot/master/sc_overflowed.png)
 
 # Guide, installation, updating
-
-See the [Wiki](http://wiki.bugsounet.fr/en/MMM-TelegramBot)
 
