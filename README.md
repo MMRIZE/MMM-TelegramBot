@@ -1,3 +1,8 @@
+**This module is not maintained any more, just will be left as it is forever**
+**If you need advanced feature, use `EXT-TelegramBot`**
+**Or you can use this module as it was, when you don't need more advanced features**
+
+
 TelegramBot module for MagicMirror<br>
 Coded by @eouia and @bugsounet
 
@@ -16,8 +21,3 @@ Coded by @eouia and @bugsounet
 
 See the [Wiki](http://wiki.bugsounet.fr/en/MMM-TelegramBot)
 
-## Support and Helping
-Support is now on [the 4th Party Modules Forum](http://forum.bugsounet.fr)
-
-## Donate
- [Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TTHRH94Y4KL36&source=url), if you love this module !
