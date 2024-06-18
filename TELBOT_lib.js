@@ -29,7 +29,7 @@ function TelegramBotMessageHandler (message, args, callbacks) {
 }
 
 TelegramBotMessageHandler.prototype.say = function(type, reqs, opts) {
-  var messageObject = TLGMessage.createMessage(type, reqs, opts)
+  const messageObject = TLGMessage.createMessage(type, reqs, opts)
   if (!messageObject) return false
   if(messageObject.class !== 'TelegramBot') return false
   messageObject.chat_id = this.chatId
@@ -38,7 +38,7 @@ TelegramBotMessageHandler.prototype.say = function(type, reqs, opts) {
 
 
 TelegramBotMessageHandler.prototype.reply = function(type, reqs, opts) {
-  var messageObject = TLGMessage.createMessage(type, reqs, opts)
+  const messageObject = TLGMessage.createMessage(type, reqs, opts)
   if (!messageObject) return false
   if(messageObject.class !== 'TelegramBot') return false
   messageObject.chat_id = this.chatId
@@ -54,7 +54,7 @@ TelegramBotMessageHandler.prototype.ask = function(
   sessionId,
   callback
 ) {
-  var messageObject = TLGMessage.createMessage(type, reqs, opts)
+  const messageObject = TLGMessage.createMessage(type, reqs, opts)
   if (!messageObject) return false
   if(messageObject.class !== 'TelegramBot') return false
   messageObject.chat_id = this.chatId
@@ -74,7 +74,7 @@ class TLGMessage {
     this.option = {}
   }
   optionAssign(option) {
-    for(var i in option) {
+    for(const i in option) {
       if (i in this.option) {
         this.option[i] = option[i]
       }
@@ -84,47 +84,33 @@ class TLGMessage {
     switch(type) {
       case 'CONTACT':
         return new TLGContactMessage(reqs, opts)
-        break;
       case 'LOCATION':
         return new TLGLocationMessage(reqs, opts)
-        break;
       case 'VENUE':
         return new TLGVenueMessage(reqs, opts)
-        break;
       case 'VOICE_URL':
         return new TLGVoiceUrlMessage(reqs, opts)
-        break;
       case 'VOICE_PATH':
         return new TLGVoicePathMessage(reqs, opts)
-        break;
       case 'VIDEO_URL':
         return new TLGVideoUrlMessage(reqs, opts)
-        break;
       case 'VIDEO_PATH':
         return new TLGVideoPathMessage(reqs, opts)
-        break;
       case 'DOCUMENT_URL':
         return new TLGDocumentUrlMessage(reqs, opts)
-        break;
       case 'DOCUMENT_PATH':
         return new TLGDocumentPathMessage(reqs, opts)
-        break;
       case 'PHOTO_URL':
         return new TLGPhotoUrlMessage(reqs, opts)
-        break;
       case 'PHOTO_PATH':
         return new TLGPhotoPathMessage(reqs, opts)
-        break;
       case 'AUDIO_URL':
         return new TLGAudioUrlMessage(reqs, opts)
-        break;
       case 'AUDIO_PATH':
         return new TLGAudioPathMessage(reqs, opts)
-        break;
       case 'TEXT':
       default:
         return new TLGTextMessage(reqs, opts)
-        break;
     }
   }
 }
@@ -214,8 +200,8 @@ class TLGVenueMessage extends TLGMessage {
       reply_to_message_id : null,
       reply_markup : null,
     }
-    var req = ['latitude', 'longitude', 'title', 'address']
-    var fail = 0
+    const req = ['latitude', 'longitude', 'title', 'address']
+    let fail = 0
     req.forEach((p)=>{
       if (venue.hasOwnProperty(p)) {
         this[p] = venue[p]
