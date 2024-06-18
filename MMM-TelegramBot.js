@@ -4,18 +4,19 @@
  *
  * By eouia & @bugsounet
  */
- String.prototype.toRegExp = function() {
-   var lastSlash = this.lastIndexOf("/")
-   if(lastSlash > 1) {
-     var restoredRegex = new RegExp(
-       this.slice(1, lastSlash),
-       this.slice(lastSlash + 1)
-     )
-     return (restoredRegex) ? restoredRegex : new RegExp(this.valueOf())
-   } else {
-     return new RegExp(this.valueOf())
-   }
- }
+
+String.prototype.toRegExp = function() {
+  let lastSlash = this.lastIndexOf("/")
+  if(lastSlash > 1) {
+    var restoredRegex = new RegExp(
+      this.slice(1, lastSlash),
+      this.slice(lastSlash + 1)
+    )
+    return (restoredRegex) ? restoredRegex : new RegExp(this.valueOf())
+  } else {
+    return new RegExp(this.valueOf())
+  }
+}
 
 Module.register("MMM-TelegramBot", {
   defaults: {
@@ -45,7 +46,9 @@ Module.register("MMM-TelegramBot", {
     telecastLimit: 5,
     telecastHideOverflow: true,
     telecastContainer: 300,
-    dateFormat: "DD-MM-YYYY HH:mm:ss"
+    //dateFormat: "DD-MM-YYYY HH:mm:ss",
+    dateFormat: { dateStyle: 'medium', timeStyle: 'medium' },
+    dateFormatLocale: 'en-US',
   },
 
   start: function() {

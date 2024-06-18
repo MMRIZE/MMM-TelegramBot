@@ -1,13 +1,15 @@
 'use strict'
 
-const moment = require('moment')
-const TelegramBot = require('node-telegram-bot-api')
+//const moment = require('moment')
+const TelegramBot = require('node-telegram-bot-api') // I'll replace this dependency with others later.
 const fs = require('fs')
 const exec = require('child_process').exec
 const path = require('path')
 const https = require('https')
+require('dotenv').config({ path: path.resolve(__dirname, '.env') })
 
-const startTime = moment()
+// const startTime = moment()
+const startTime = new Date()
 
 var _log = function() {
     var context = "[TELBOT]"
@@ -18,7 +20,7 @@ var log = function() {
   //do nothing
 }
 
-var NodeHelper = require("node_helper");
+const NodeHelper = require("node_helper")
 
 module.exports = NodeHelper.create({
   start: function () {
@@ -33,6 +35,21 @@ module.exports = NodeHelper.create({
     this.TBService = true
   },
 
+  formatDate: function (dateObj) {
+    const { dateFormatLocale, dateFormat } = this.config
+    if (typeof dateFormat === 'string') {
+      log("[DEPRECATED] String type for config.dateFormat is deprecated. Please use object type.")
+      dateFormat = { dateStyle: 'medium', timeStyle: 'medium' }
+    }
+    try {
+      return new Intl.DateTimeFormat(dateFormatLocale, dateFormat).format(dateObj)
+    } catch (e) {
+      log("[ERROR] Invalid dateFormatLocale or dateFormat")
+      log(e)
+      return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'medium' }).format(dateObj)
+    }
+  },
+
   initialize: function(config) {
     this.config = config
     this.TBService = this.config.TelegramBotServiceAlerte
@@ -41,11 +58,17 @@ module.exports = NodeHelper.create({
     if (typeof config.adminChatId !== 'undefined') {
       this.adminChatId = this.config.adminChatId
     }
-    if (typeof config.telegramAPIKey !== 'undefined') {
+    if (config.telegramAPIKey) {
+      console.error("[TELBOT] Now TelegramBot API Key SHOULD be set through .env file.")
+    }
+    console.log(process.env?.TELEGRAM_API_KEY)
+    const apiKey = process.env?.TELEGRAM_API_KEY || config?.telegramAPIKey
+
+    if (apiKey) {
       try {
-        var option = Object.assign({polling:true}, config.detailOption)
-        this.TB = new TelegramBot(config.telegramAPIKey, option)
-        var me = this.TB.getMe()
+        const option = Object.assign({polling:true}, config.detailOption)
+        this.TB = new TelegramBot(apiKey, option)
+        const me = this.TB.getMe()
       } catch (err) {
         return console.log("[TELBOT]", err)
       }
@@ -74,7 +97,7 @@ module.exports = NodeHelper.create({
           }
         }
         console.log("[TELBOT] Error " + error.response.body.error_code, error.response.body.description)
-        var msg = {
+        const msg = {
           type: 'TEXT',
           text: null,
           option: {
@@ -90,7 +113,7 @@ module.exports = NodeHelper.create({
                 msg.text += "\n\n" + this.config.text["TELBOT_HELPER_SERVED"]
                 this.say(msg, true)
               } else {
-                console.log("[TELBOT] stopPolling...")
+                console.log("[TELBOT] stop Polling...")
               }
               this.TB.stopPolling()
             } else {
@@ -144,15 +167,17 @@ module.exports = NodeHelper.create({
   },
 
   processMessage: function(msg) {
-    var time = moment.unix(msg.date)
-    if (startTime.isAfter(time)) return //do nothing
-    var commandLike = (msg.text) ? msg.text : ((msg.caption) ? msg.caption : "")
+    // var time = moment.unix(msg.date)
+    const time = new Date(msg.date * 1000)
+    //if (startTime.isAfter(time)) return //do nothing
+    if (time.getTime() < startTime.getTime()) return //do nothing
+    const commandLike = (msg.text) ? msg.text : ((msg.caption) ? msg.caption : "")
     if (commandLike.indexOf("/") === 0) {
       //commandLike
       if (!this.allowed.has(msg.from.username)) {
         const notAllowedMsg = (messageid, chatid) => {
-          var text = this.config.text["TELBOT_HELPER_NOT_ALLOWED"]
-          var msg = {
+          const text = this.config.text["TELBOT_HELPER_NOT_ALLOWED"]
+          return {
             type: 'TEXT',
             chat_id: chatid,
             text: text,
@@ -162,7 +187,6 @@ module.exports = NodeHelper.create({
               parse_mode: 'Markdown'
             }
           }
-          return msg
         }
         this.say(notAllowedMsg(msg.message_id, msg.chat.id))
         return
@@ -173,8 +197,8 @@ module.exports = NodeHelper.create({
     } else {
       // Not commandlike
       if (msg.reply_to_message) {
-        var reply = msg.reply_to_message.message_id
-        var foundSession = 0
+        const reply = msg.reply_to_message.message_id
+        let foundSession = 0
         this.askSession.forEach((s) => {
           if(s.messageId == reply) {
             foundSession = 1
@@ -183,7 +207,8 @@ module.exports = NodeHelper.create({
             this.askSession.delete(s)
             return
           }
-          if (moment.unix(s.time).isBefore(moment().add(-1, 'hours'))) {
+          //if (moment.unix(s.time).isBefore(moment().add(-1, 'hours'))) {
+          if (new Date(+s.time * 1000).getTime() < new Date().getTime() - 1000 * 60 * 60){
             this.askSession.delete(s)
           }
         })
@@ -205,18 +230,18 @@ module.exports = NodeHelper.create({
   },
 
   cookMsg: async function (msg, callback=(retmsg)=>{}) {
-    var fromUserId = msg.from.id
+    const fromUserId = msg.from.id
     const clearCache = (life)=>{
       return new Promise ((resolve)=>{
         try {
           log("Clearing old cache data")
-          var cacheDir = path.resolve(__dirname, "cache")
-          var files = fs.readdirSync(cacheDir)
+          const cacheDir = path.resolve(__dirname, "cache")
+          const files = fs.readdirSync(cacheDir)
           for (var f of files) {
-            var p = path.join(cacheDir, f)
-            var stat = fs.statSync(p)
-            var now = new Date().getTime()
-            var endTime = new Date(stat.ctime).getTime() + life
+            const p = path.join(cacheDir, f)
+            const stat = fs.statSync(p)
+            const now = new Date().getTime()
+            const endTime = new Date(stat.ctime).getTime() + life
             if (now > endTime) {
               log("Unlink old cache file:", p)
               fs.unlinkSync(p)
@@ -230,7 +255,7 @@ module.exports = NodeHelper.create({
     }
     const downloadFile = (url, filepath)=>{
       return new Promise((resolve)=>{
-        var f = fs.createWriteStream(filepath)
+        const f = fs.createWriteStream(filepath)
         f.on('finish', () => {
           f.close()
           resolve(filepath)
@@ -241,53 +266,53 @@ module.exports = NodeHelper.create({
       })
     }
     const processProfilePhoto = async ()=>{
-      var upp = await this.TB.getUserProfilePhotos(fromUserId, {offset:0, limit:1})
+      const upp = await this.TB.getUserProfilePhotos(fromUserId, {offset:0, limit:1})
       if (!(upp && upp.total_count)) return null
-      var file = path.resolve(__dirname, "cache", String(fromUserId))
+      const file = path.resolve(__dirname, "cache", String(fromUserId))
       if (fs.existsSync(file)) return fromUserId
-      var photo = upp.photos[0][0]
-      var link = await this.TB.getFileLink(photo.file_id)
+      const photo = upp.photos[0][0]
+      const link = await this.TB.getFileLink(photo.file_id)
       await downloadFile(link, file)
       return fromUserId
     }
     const processChatPhoto = async (fileArray) => {
-      var bigger = fileArray.reduce((p, v)=>{
+      const bigger = fileArray.reduce((p, v)=>{
         return (p.file_size > v.file_size ? p : v)
       })
-      var fileId = bigger.file_id
-      var link = await this.TB.getFileLink(fileId)
-      var file = path.resolve(__dirname, "cache", String(bigger.file_unique_id))
+      const fileId = bigger.file_id
+      const link = await this.TB.getFileLink(fileId)
+      const file = path.resolve(__dirname, "cache", String(bigger.file_unique_id))
       await downloadFile(link, file)
       return bigger.file_unique_id
     }
 
     const processChatSticker = async (sticker) => {
-      var fileId = sticker.thumb.file_id
-      var link = await this.TB.getFileLink(fileId)
-      var file = path.resolve(__dirname, "cache", String(sticker.thumb.file_unique_id))
+      const fileId = sticker.thumb.file_id
+      const link = await this.TB.getFileLink(fileId)
+      const file = path.resolve(__dirname, "cache", String(sticker.thumb.file_unique_id))
       await downloadFile(link, file)
       return sticker.thumb.file_unique_id
     }
 
     const processChatAnimated = async (animation) => {
-      var fileId = animation.file_id
-      var link = await this.TB.getFileLink(fileId)
-      var file = path.resolve(__dirname, "cache", String(animation.file_unique_id))
+      const fileId = animation.file_id
+      const link = await this.TB.getFileLink(fileId)
+      const file = path.resolve(__dirname, "cache", String(animation.file_unique_id))
       await downloadFile(link, file)
       return animation.file_unique_id
     }
 
     const processChatAudio = async (audio) => {
-      var fileId = audio.file_id
-      var link = await this.TB.getFileLink(fileId)
-      var file = path.resolve(__dirname, "cache", String(audio.file_unique_id))
+      const fileId = audio.file_id
+      const link = await this.TB.getFileLink(fileId)
+      const file = path.resolve(__dirname, "cache", String(audio.file_unique_id))
       await downloadFile(link, file)
       return audio.file_unique_id
     }
 
-    var r = await clearCache(this.config.telecastLife)
+    const r = await clearCache(this.config.telecastLife)
     if (r instanceof Error) log (r)
-    var profilePhoto = await processProfilePhoto()
+    const profilePhoto = await processProfilePhoto()
     if (profilePhoto) msg.from["_photo"] = String(profilePhoto)
     if (msg.hasOwnProperty("photo") && Array.isArray(msg.photo)) {
       if (msg.caption) msg.text = msg.caption
@@ -310,11 +335,14 @@ module.exports = NodeHelper.create({
     callback(msg)
   },
 
-  tooOldMsg: function(origMsg) {
-    var text = origMsg.text
+  tooOldMsg: function (origMsg) {
+    console.log('origMsg.date', origMsg.date)
+
+    const text = origMsg.text
       + this.config.text["TELBOT_HELPER_TOOOLDMSG"]
-      + moment.unix(origMsg.date).format(this.config.dateFormat)
-    var msg = {
+    //+ moment.unix(origMsg.date).format(this.config.dateFormat)
+      + this.formatDate(new Date(+origMsg.date * 1000))
+    const msg = {
       type: 'TEXT',
       chat_id: origMsg.chat.id,
       text: text,
@@ -326,11 +354,12 @@ module.exports = NodeHelper.create({
     return msg
   },
 
-  welcomeMsg: function() {
-    var text = "*" + this.config.text["TELBOT_HELPER_WAKEUP"] + "*\n"
+  welcomeMsg: function () {
+    const text = "*" + this.config.text["TELBOT_HELPER_WAKEUP"] + "*\n"
       + this.config.text["TELBOT_HELPER_RESTART"]
-      + "\n`" + startTime.format(this.config.dateFormat) + "`\n"
-    var msg = {
+    //+ "\n`" + startTime.format(this.config.dateFormat) + "`\n"
+      + "\n`" + this.formatDate(startTime) + "`\n"
+    const msg = {
       type: 'TEXT',
       chat_id: this.adminChatId,
       text: text,
@@ -343,39 +372,40 @@ module.exports = NodeHelper.create({
   },
 
   say: function(r, adminMode=false) {
-    var chatId = (adminMode) ? this.adminChatId : r.chat_id
+    const chatId = (adminMode) ? this.adminChatId : r.chat_id
     if (!this.TB.isPolling() || !chatId) return
+    let data = null
     switch(r.type) {
       case 'VOICE_PATH':
-        var data = fs.readFileSync(r.path);
+        data = fs.readFileSync(r.path);
         this.TB.sendVoice(chatId, data, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'VOICE_URL':
         this.TB.sendVoice(chatId, r.path, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'VIDEO_PATH':
-        var data = fs.readFileSync(r.path);
+        data = fs.readFileSync(r.path);
         this.TB.sendVideo(chatId, data, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'VIDEO_URL':
         this.TB.sendVideo(chatId, r.path, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'DOCUMENT_PATH':
-        var data = fs.readFileSync(r.path);
+        data = fs.readFileSync(r.path);
         this.TB.sendDocument(chatId, data, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'DOCUMENT_URL':
         this.TB.sendDocument(chatId, r.path, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'PHOTO_PATH':
-        var data = fs.readFileSync(r.path);
+        data = fs.readFileSync(r.path);
         this.TB.sendPhoto(chatId, data, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'PHOTO_URL':
         this.TB.sendPhoto(chatId, r.path, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'AUDIO_PATH':
-        var data = fs.readFileSync(r.path);
+        data = fs.readFileSync(r.path);
         this.TB.sendAudio(chatId, data, r.option).catch((e) => {this.onError(e, r)})
         break;
       case 'AUDIO_URL':
@@ -398,8 +428,8 @@ module.exports = NodeHelper.create({
   },
 
   ask: function(r, adminMode=false) {
-    var chatId = (adminMode) ? this.adminChatId : r.chat_id
-    var sessionId = r.askSession.session_id
+    const chatId = (adminMode) ? this.adminChatId : r.chat_id
+    const sessionId = r.askSession.session_id
 
     switch(r.type) {
       case 'TEXT':
@@ -470,7 +500,7 @@ module.exports = NodeHelper.create({
     }
 
     if (err.code !== 'EFATAL') {
-      var text = '`ERROR`\n'
+      const text = '`ERROR`\n'
         + "```\n"
         + ((err.response) ? err.response.body.description : "??")
         + "\n```\n"
@@ -478,7 +508,7 @@ module.exports = NodeHelper.create({
         + "```\n"
         + JSON.stringify(response)
         + "\n```"
-      var msg = {
+      const msg = {
         type: 'TEXT',
         text: text,
         option: {
@@ -503,26 +533,27 @@ module.exports = NodeHelper.create({
       }
     }
     log("SHELL:", command)
-    exec(command, function(error, stdout, stderr){
-      var result = stdout
-      if (error) { result = error.message}
+    exec(command, function (error, stdout, stderr) {
+      const result = (error) ? error.message : stdout
       log("SHELL RESULT:", result)
       callback(result, sessionId)
     })
   },
 
   screenshot: function(sessionId = null, callback=null) {
-    var shotDir = path.resolve(__dirname, "screenshot")
-    var command = "scrot -o " + shotDir + "/screenshot.png"
-    var t = new moment()
-    var retObj = {
+    const shotDir = path.resolve(__dirname, "screenshot")
+    const command = "scrot -o " + shotDir + "/screenshot.png"
+    //var t = new moment()
+    const t = new Date()
+    const retObj = {
       session: sessionId,
-      timestamp: t.format(this.config.dateFormat),
+      //timestamp: t.format(this.config.dateFormat),
+      timestamp: this.formatDate(t),
       path: shotDir + "/screenshot.png",
       result: "",
       status: false
     }
-    if (callback == null) {
+    if (typeof callback !== 'function') {
       callback = (ret, session) => {
         if (ret.length > 3000) {
           ret = ret.slice(0, 3000) + " ..."
@@ -533,7 +564,7 @@ module.exports = NodeHelper.create({
     }
     log("SCREENSHOT:", command)
     exec(command, function(error, stdout, stderr){
-      var result = stdout
+      let result = stdout
       if (error) {
         retObj.result = error.message
         result = error.message
