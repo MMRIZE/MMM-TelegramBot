@@ -157,6 +157,7 @@ module.exports = NodeHelper.create({
         this.say(this.welcomeMsg())
       }
       console.log("[TELBOT] Ready!")
+      this.sendSocketNotification('READY')
       this.TB.on('message', (msg) =>{
         this.processMessage(msg)
       })
@@ -502,6 +503,9 @@ module.exports = NodeHelper.create({
         break
       case 'FORCE_TELECAST':
         if (this.TB) this.processTelecast(payload)
+        break
+      case 'SET_COMMANDS':
+        if (this.TB) this.TB.setMyCommands(payload)
         break
     }
   },
