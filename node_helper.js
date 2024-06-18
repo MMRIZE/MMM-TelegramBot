@@ -61,7 +61,6 @@ module.exports = NodeHelper.create({
     if (config.telegramAPIKey) {
       console.error("[TELBOT] Now TelegramBot API Key SHOULD be set through .env file.")
     }
-    console.log(process.env?.TELEGRAM_API_KEY)
     const apiKey = process.env?.TELEGRAM_API_KEY || config?.telegramAPIKey
 
     if (apiKey) {
@@ -166,7 +165,7 @@ module.exports = NodeHelper.create({
     }
   },
 
-  processMessage: function(msg) {
+  processMessage: async function (msg) {
     // var time = moment.unix(msg.date)
     const time = new Date(msg.date * 1000)
     //if (startTime.isAfter(time)) return //do nothing
@@ -192,7 +191,11 @@ module.exports = NodeHelper.create({
         return
       } else {
         msg.text = commandLike
-        this.sendSocketNotification('COMMAND', msg)
+        this.cookMsg(msg, (message) => {
+          this.sendSocketNotification('COMMAND', message)
+        })
+        // msg.text = commandLike
+        // this.sendSocketNotification('COMMAND', msg)
       }
     } else {
       // Not commandlike
@@ -200,7 +203,7 @@ module.exports = NodeHelper.create({
         const reply = msg.reply_to_message.message_id
         let foundSession = 0
         this.askSession.forEach((s) => {
-          if(s.messageId == reply) {
+          if(s.messageId === reply) {
             foundSession = 1
             msg.sessionId = s.sessionId
             this.sendSocketNotification('ANSWER', msg)
@@ -212,12 +215,12 @@ module.exports = NodeHelper.create({
             this.askSession.delete(s)
           }
         })
-        if (foundSession == 1) return
+        if (foundSession === 1) return
         if (msg.reply_to_message.from.is_bot) return // Don't transfer reply for Robot.
       }
       // Not answer for Bot
       if (!this.config.telecast) return
-      if (String(this.config.telecast) == String(msg.chat.id) || this.allowed.has(msg.from.username)) {
+      if (String(this.config.telecast) === String(msg.chat.id) || this.allowed.has(msg.from.username)) {
         this.processTelecast(msg)
       }
     }
@@ -281,9 +284,9 @@ module.exports = NodeHelper.create({
       })
       const fileId = bigger.file_id
       const link = await this.TB.getFileLink(fileId)
-      const file = path.resolve(__dirname, "cache", String(bigger.file_unique_id))
+      const file = path.resolve(__dirname, "cache", String(bigger.file_unique_id) + ".jpg")
       await downloadFile(link, file)
-      return bigger.file_unique_id
+      return String(bigger.file_unique_id) + ".jpg"
     }
 
     const processChatSticker = async (sticker) => {
@@ -310,13 +313,23 @@ module.exports = NodeHelper.create({
       return audio.file_unique_id
     }
 
+    const processChatDocument = async (document) => {
+      const fileId = document.file_id
+      const fileName = document.file_name
+      const link = await this.TB.getFileLink(fileId)
+      const file = path.resolve(__dirname, "cache", String(fileName))
+      await downloadFile(link, file)
+      return fileName
+    }
+
     const r = await clearCache(this.config.telecastLife)
     if (r instanceof Error) log (r)
     const profilePhoto = await processProfilePhoto()
     if (profilePhoto) msg.from["_photo"] = String(profilePhoto)
     if (msg.hasOwnProperty("photo") && Array.isArray(msg.photo)) {
       if (msg.caption) msg.text = msg.caption
-      msg.chat["_photo"] = String(await processChatPhoto(msg.photo))
+      msg.chat[ "_photo" ] = String(await processChatPhoto(msg.photo))
+      msg.chat[ "_photo_path" ] = path.resolve(__dirname, "cache", msg.chat[ "_photo" ])
     }
     if (msg.hasOwnProperty("sticker")) { // pass sticker as photo
       msg.chat["_photo"] = String(await processChatSticker(msg.sticker))
@@ -327,16 +340,18 @@ module.exports = NodeHelper.create({
     if (msg.hasOwnProperty("audio")) {
       msg.chat["_audio"] = String(await processChatAudio(msg.audio))
     }
-
     if (msg.hasOwnProperty("voice")) {
       msg.chat["_voice"] = String(await processChatAudio(msg.voice))
+    }
+    if (msg.hasOwnProperty("document")) {
+      msg.chat[ "_document" ] = String(await processChatDocument(msg.document))
+      msg.chat[ "_document_path" ] = path.resolve(__dirname, "cache", msg.chat[ "_document" ])
     }
 
     callback(msg)
   },
 
   tooOldMsg: function (origMsg) {
-    console.log('origMsg.date', origMsg.date)
 
     const text = origMsg.text
       + this.config.text["TELBOT_HELPER_TOOOLDMSG"]
@@ -521,7 +536,7 @@ module.exports = NodeHelper.create({
   },
 
   shell: function(command, sessionId=null, callback=null){
-    if (callback == null) {
+    if (callback === null) {
       callback = (ret, session) => {
         if (ret.length > 3000) {
           ret = ret.slice(0, 3000) + " ..."
