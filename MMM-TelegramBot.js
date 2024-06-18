@@ -356,7 +356,7 @@ Module.register("MMM-TelegramBot", {
     var text = this.translate("TELBOT_FAVOR_RESULT")
     handler.reply("TEXT", text, {
       reply_markup: {
-        resize_keyboard: true,
+        resize_keyboard: false,
         one_time_keyboard: true,
         keyboard: [this.config.favourites]
       },
@@ -899,6 +899,10 @@ Module.register("MMM-TelegramBot", {
 
   socketNotificationReceived: function (notification, payload) {
     switch (notification) {
+      case 'READY':
+        console.log(this.commands)
+        this.sendSocketNotification('SET_COMMANDS', this.commands.map((c) => { return { command:c.command, description:c.description } }))
+        break
       case 'CHAT':
         this.telecast(payload)
         break
