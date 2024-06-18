@@ -354,11 +354,12 @@ Module.register("MMM-TelegramBot", {
 
   TELBOT_favor: function (command, handler) {
     var text = this.translate("TELBOT_FAVOR_RESULT")
+    const keyboards = (this.config.favourites[0][0]) ? this.config.favourites : [this.config.favourites]
     handler.reply("TEXT", text, {
       reply_markup: {
-        resize_keyboard: false,
+        resize_keyboard: true,
         one_time_keyboard: true,
-        keyboard: [this.config.favourites]
+        keyboard: keyboards
       },
       parse_mode:"Markdown"
     })
